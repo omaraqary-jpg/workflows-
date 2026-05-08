@@ -1,0 +1,143 @@
+{
+  "name": "ERROR Notification",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -256
+      ],
+      "id": "01555f0a-b324-4caa-b2bc-9c4a3934ff9f",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff64b99-d0c5-4bc5-9c84-44c9c679c22a",
+              "name": "execution.error.message",
+              "value": "={{ $json.execution.error.message }}",
+              "type": "string"
+            },
+            {
+              "id": "2dc57a06-9d24-4dcb-8fe8-7fc84099a8dd",
+              "name": "workflow.id",
+              "value": "={{ $json.workflow.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a4ec5ff7-5009-4e71-b9ff-fd33efc6f098",
+              "name": "workflow.name",
+              "value": "={{ $json.workflow.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7abac67a-775f-4a46-bd55-98df8436e5d3",
+              "name": "execution.url",
+              "value": "={{ $json.execution.url }}",
+              "type": "string"
+            },
+            {
+              "id": "d0779af1-5dd6-4105-9204-ca3ef2477528",
+              "name": "execution.lastNodeExecuted",
+              "value": "={{ $json.execution.lastNodeExecuted }}",
+              "type": "string"
+            },
+            {
+              "id": "9cfbadb1-580d-4475-8a6a-3ce04b4f297d",
+              "name": "execution.retryOf",
+              "value": "={{ $json.execution.retryOf }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -768,
+        -256
+      ],
+      "id": "e79648fe-8f07-4ce7-aeee-cab7d028157a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "omaraboulwaffa@gmail.com",
+        "subject": "N8N Error",
+        "emailType": "text",
+        "message": "={{ $json.execution.error.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        -256
+      ],
+      "id": "fa9cf80a-336a-4fc7-9445-65b0e9ad94bd",
+      "name": "Send a message",
+      "webhookId": "bed489af-ee83-471c-b035-bdf7c2f5fe2e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VFF6sfdrXkOdXyt5",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d1fcbb56-d7b3-49b6-acf5-21becacc2f51",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "wASx36bdFTlubpGhe8lV6",
+  "tags": [
+    {
+      "updatedAt": "2026-01-23T12:01:15.150Z",
+      "createdAt": "2026-01-23T12:01:15.150Z",
+      "id": "6ZKdv8Cn5nIYM1Hz",
+      "name": "Property"
+    },
+    {
+      "updatedAt": "2026-01-30T11:48:53.220Z",
+      "createdAt": "2026-01-30T11:48:53.220Z",
+      "id": "hhdg4A7lYzsZvuSQ",
+      "name": "ERROR HANDLING"
+    }
+  ]
+}

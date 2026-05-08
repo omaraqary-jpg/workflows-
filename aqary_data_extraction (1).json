@@ -1,0 +1,1328 @@
+{
+  "name": "aqary_data_extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://aqaryproperty.com/investment/investment/listing.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        112,
+        0
+      ],
+      "id": "ada4979e-7ec0-4bef-a1eb-e264b5e59b35",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "f551fc0b-5652-4d34-bba5-f1b7bc7741f5",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "list.property",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "22cbc345-9e35-4e3e-bbf9-eebe9098a9c7",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "8b16cbc4-d6b4-4399-a164-bd09458e901c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "https://integrations.aqaryservices.com/v1/webhook/propertyndunit/all",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Webhook-API-Key",
+              "value": "b260e52568bb97d7e4143b8b6c692b6f2e4aef02141df859aa8d21560a180aa3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        832,
+        464
+      ],
+      "id": "a0e2941f-66db-4a96-adc1-320338392589",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "list.data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        656
+      ],
+      "id": "24803aff-b716-4323-ac8e-ada95c0ee900",
+      "name": "Split Out1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "jsonToxml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        848,
+        672
+      ],
+      "id": "842358d7-9e54-43f2-aac3-60ebd2187562",
+      "name": "XML1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Function to find the property containing your data (looking for 'ref_no')\nconst findRawString = (obj) => {\n  for (let key in obj) {\n    if (typeof obj[key] === 'string' && obj[key].includes('ref_no')) {\n      return obj[key];\n    }\n    if (typeof obj[key] === 'object' && obj[key] !== null) {\n      let found = findRawString(obj[key]);\n      if (found) return found;\n    }\n  }\n  return null;\n};\n\nconst rawData = findRawString($input.item.json);\n\n// 2. Safety check\nif (!rawData) {\n  return { \n    json: { \n      error: \"Could not find the property string.\",\n      tip: \"Ensure 'Response Format' in your HTTP Request node is set to 'Text' or 'JSON'.\",\n      debug_input: $input.item.json \n    } \n  };\n}\n\n// 3. Clean up non-breaking spaces and whitespace\nlet cleanData = rawData.replace(/\\u00a0/g, ' ').replace(/\\s+/g, ' ').trim();\n\n// 4. Remove trailing comma (very important for your specific data)\ncleanData = cleanData.replace(/,$/, \"\");\n\n// 5. Wrap and Parse\ntry {\n  const jsonString = `{ ${cleanData} }`;\n  const result = JSON.parse(jsonString);\n  return { json: result };\n} catch (error) {\n  return { json: { error: \"JSON Parse failed\", message: error.message, data: cleanData } };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        368
+      ],
+      "id": "aa70b90f-25cb-4052-85ba-894a66a26b31",
+      "name": "Code in JavaScript",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        672
+      ],
+      "id": "2fa29152-1b3d-48c3-8e83-df5908f32aa9",
+      "name": "XML2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw text. \n// We use Object.values()[0] in case the API puts the string in a random key.\nconst items = $input.all();\nlet results = [];\n\nfor (const item of items) {\n  let rawData = item.json.data || Object.values(item.json)[0];\n\n  if (typeof rawData !== 'string') continue;\n\n  // 2. Clean up the \"noise\" (Non-breaking spaces and massive line breaks)\n  let cleanData = rawData.replace(/\\u00a0/g, ' ').replace(/\\s+/g, ' ').trim();\n\n  // 3. Fix the trailing comma if it exists at the very end\n  cleanData = cleanData.replace(/,$/, \"\");\n\n  try {\n    // 4. Wrap in braces and parse\n    const parsed = JSON.parse(`{ ${cleanData} }`);\n    results.push({ json: parsed });\n  } catch (e) {\n    results.push({ json: { error: \"Parse failed\", original: rawData.substring(0, 50) } });\n  }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        624
+      ],
+      "id": "69a84e71-f2b9-46a3-bbdf-b29a3ef0b5c8",
+      "name": "Code in JavaScript1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        0
+      ],
+      "id": "b4753ef5-3bdc-4e71-bab0-c71a8ea6eb83",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appniqWdqSCZ0Emjx",
+          "mode": "list",
+          "cachedResultName": "Imported table-Grid view.csv",
+          "cachedResultUrl": "https://airtable.com/appniqWdqSCZ0Emjx"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbljWK9WWmAkjj8Wj",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appniqWdqSCZ0Emjx/tbljWK9WWmAkjj8Wj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UNIT_ID": "={{ $('Loop Over Items').item.json.reference_number }}",
+            "bathroom": "={{ $('Loop Over Items').item.json.bathroom }}",
+            "PROJECT_NAME": "={{ $('Loop Over Items').item.json.project_name }}",
+            "TITLE_AR": "={{ $('Loop Over Items').item.json.title_ar }}",
+            "UNIT_DESCRIPTION_EN": "={{ $('Loop Over Items').item.json.description }}",
+            "bedroom": "={{ $('Loop Over Items').item.json.bedroom }}",
+            "TITLE_EN": "={{ $('Loop Over Items').item.json.title }}",
+            "UNIT_DESCRIPTION_AR": "={{ $('Loop Over Items').item.json.description_ar }}",
+            "unit_type": "={{ $('Loop Over Items').item.json.property_type }}",
+            "lifestyle": "={{ $('Loop Over Items').item.json.lifestyle }}"
+          },
+          "matchingColumns": [
+            "UNIT_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "UNIT_ID",
+              "displayName": "UNIT_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_COVER_IMAGE",
+              "displayName": "UNIT_COVER_IMAGE",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "UNIT_URL",
+              "displayName": "UNIT_URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "PROJECT_NAME",
+              "displayName": "PROJECT_NAME",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "TITLE_AR",
+              "displayName": "TITLE_AR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_DESCRIPTION_EN",
+              "displayName": "UNIT_DESCRIPTION_EN",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "TITLE_EN",
+              "displayName": "TITLE_EN",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "unit_type",
+              "displayName": "unit_type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lifestyle",
+              "displayName": "lifestyle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bedroom",
+              "displayName": "bedroom",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bathroom",
+              "displayName": "bathroom",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_DESCRIPTION_AR",
+              "displayName": "UNIT_DESCRIPTION_AR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "post_status",
+              "displayName": "post_status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Created",
+                  "value": "Created"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "updatedAt",
+              "displayName": "updatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "reference image",
+              "displayName": "reference image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        16
+      ],
+      "id": "937fccd6-4e83-422f-9663-4ab88556bf9d",
+      "name": "Create or update a record",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "model": "dall-e-2",
+        "prompt": "remove any water mark, and keep everything else as it is ",
+        "binaryPropertyName": "UNIT_COVER_IMAGE_0",
+        "size": "auto",
+        "responseFormat": "b64_json",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        2800,
+        32
+      ],
+      "id": "989f5509-8bb3-4344-8dce-04054f220f37",
+      "name": "Edit image",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2336,
+        16
+      ],
+      "id": "a956d13e-0ef1-43ca-93f7-894b674514fe",
+      "name": "Loop Over Items1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbletK15eylF352sZ",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tbletK15eylF352sZ"
+        },
+        "filterByFormula": "=({UNIT_ID}=\"{{ $('Loop Over Items').item.json.reference_number }}\")",
+        "options": {
+          "downloadFields": "=UNIT_COVER_IMAGE",
+          "fields": [
+            "UNIT_COVER_IMAGE"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2560,
+        32
+      ],
+      "id": "b4f97981-6264-42d3-9990-ab223b2cd0da",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.reference_number }}",
+        "returnAll": true,
+        "filter": {},
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        16
+      ],
+      "id": "5f5908e4-ee0d-4af5-bad9-76f152d860c4",
+      "name": "Search files and folders",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "8c54bbb5-eba6-448f-a874-a82079ac1977",
+      "name": "Download file",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbletK15eylF352sZ",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tbletK15eylF352sZ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "bathroom": 0,
+            "id": 0
+          },
+          "matchingColumns": [
+            "UNIT_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_ID",
+              "displayName": "UNIT_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_COVER_IMAGE",
+              "displayName": "UNIT_COVER_IMAGE",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "UNIT_URL",
+              "displayName": "UNIT_URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "PROJECT_NAME",
+              "displayName": "PROJECT_NAME",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "TITLE_AR",
+              "displayName": "TITLE_AR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "افضل سعر | غرفتين نوم + بلكونة | امتلك الان",
+                  "value": "افضل سعر | غرفتين نوم + بلكونة | امتلك الان"
+                },
+                {
+                  "name": "عائد استثمتاري عالي | شقة فاخرة | تسليم قريبا ",
+                  "value": "عائد استثمتاري عالي | شقة فاخرة | تسليم قريبا "
+                },
+                {
+                  "name": "امتلك قريبا | في الطوابق العليا | مساحة واسعة",
+                  "value": "امتلك قريبا | في الطوابق العليا | مساحة واسعة"
+                },
+                {
+                  "name": "شقة أنيقة بغرفتين وشرفة خاصة في موقع استثنائي",
+                  "value": "شقة أنيقة بغرفتين وشرفة خاصة في موقع استثنائي"
+                },
+                {
+                  "name": "امتلك الان | شقة فاخرة | اطلالة كاملة علي القناة ",
+                  "value": "امتلك الان | شقة فاخرة | اطلالة كاملة علي القناة "
+                },
+                {
+                  "name": "فرصة رائعة: شقة غرفتين بموقع مميز وبلكونة",
+                  "value": "فرصة رائعة: شقة غرفتين بموقع مميز وبلكونة"
+                },
+                {
+                  "name": "شقة عصرية بغرفة نوم واحدة | مرافق ممتازة | معيشة راقية",
+                  "value": "شقة عصرية بغرفة نوم واحدة | مرافق ممتازة | معيشة راقية"
+                },
+                {
+                  "name": "بالطوابق العليا شقة 3 غرف نوم فاخرة بتصميم عصري ",
+                  "value": "بالطوابق العليا شقة 3 غرف نوم فاخرة بتصميم عصري "
+                },
+                {
+                  "name": "",
+                  "value": ""
+                },
+                {
+                  "name": "انتقل الان | شقة فاخرة 3 غرف + غرفة خادمة | مدفوعات مرنة",
+                  "value": "انتقل الان | شقة فاخرة 3 غرف + غرفة خادمة | مدفوعات مرنة"
+                },
+                {
+                  "name": "فرصة استثمارية I تملك الان شقة بأطلالة خلابة على المسبح",
+                  "value": "فرصة استثمارية I تملك الان شقة بأطلالة خلابة على المسبح"
+                },
+                {
+                  "name": "سنجل روو | تاون هاوس من غرفتين | قريب من البحيرة",
+                  "value": "سنجل روو | تاون هاوس من غرفتين | قريب من البحيرة"
+                },
+                {
+                  "name": "فيلا فاخرة مستقلة مع حديقة وشرفات بانورامية",
+                  "value": "فيلا فاخرة مستقلة مع حديقة وشرفات بانورامية"
+                },
+                {
+                  "name": "انقل قريبا لشقة فاخرة بالطوابق العليا وبأطلالة خلابة",
+                  "value": "انقل قريبا لشقة فاخرة بالطوابق العليا وبأطلالة خلابة"
+                },
+                {
+                  "name": "مزيج مثالي بين السعر والموقع والمساحة",
+                  "value": "مزيج مثالي بين السعر والموقع والمساحة"
+                },
+                {
+                  "name": "صفقة استثمارية قوية | بريميوم منخفض",
+                  "value": "صفقة استثمارية قوية | بريميوم منخفض"
+                },
+                {
+                  "name": "شقة واسعة |غرفتين نوم + بلكونة | طابق عالي",
+                  "value": "شقة واسعة |غرفتين نوم + بلكونة | طابق عالي"
+                },
+                {
+                  "name": "فيلا فاخرة 4 غرف نوم مع تصميم عصري ومساحات واسعة",
+                  "value": "فيلا فاخرة 4 غرف نوم مع تصميم عصري ومساحات واسعة"
+                },
+                {
+                  "name": "الأفضل في ريمان ليفينغ: شقة 3 غرف بمساحة مثالية",
+                  "value": "الأفضل في ريمان ليفينغ: شقة 3 غرف بمساحة مثالية"
+                },
+                {
+                  "name": "فيلا 5 غرف واسعة | عرض رائع | جاهزة قريباً",
+                  "value": "فيلا 5 غرف واسعة | عرض رائع | جاهزة قريباً"
+                },
+                {
+                  "name": "شقة 2 غرف + شرفة | إطلالة حمام السباحة | طابق مرتفع",
+                  "value": "شقة 2 غرف + شرفة | إطلالة حمام السباحة | طابق مرتفع"
+                },
+                {
+                  "name": "امتلك الان شقه قمة الفخامه وتصميم حديث",
+                  "value": "امتلك الان شقه قمة الفخامه وتصميم حديث"
+                },
+                {
+                  "name": "شقة غرفة | بلكونة | موقع واطلالة مساحة سعر مميزين",
+                  "value": "شقة غرفة | بلكونة | موقع واطلالة مساحة سعر مميزين"
+                },
+                {
+                  "name": "شقة غرفتين بالطوابق العليا  وبإطلالة علي القناة",
+                  "value": "شقة غرفتين بالطوابق العليا  وبإطلالة علي القناة"
+                },
+                {
+                  "name": "غرفتي نوم | مساحة معيشة واسعة | موقع مميز",
+                  "value": "غرفتي نوم | مساحة معيشة واسعة | موقع مميز"
+                },
+                {
+                  "name": "شقة أنيقة بغرفتي نوم | إطلالة على المسبح | معيشة راقية في خليج ياس",
+                  "value": "شقة أنيقة بغرفتي نوم | إطلالة على المسبح | معيشة راقية في خليج ياس"
+                },
+                {
+                  "name": "فيلا كورنر بسعر منافس في فاي الريمان 2",
+                  "value": "فيلا كورنر بسعر منافس في فاي الريمان 2"
+                },
+                {
+                  "name": "افضل سعر | استوديو فاخر | تشطيب عصري ",
+                  "value": "افضل سعر | استوديو فاخر | تشطيب عصري "
+                },
+                {
+                  "name": "شقة غرفة نوم واحدة أنيقة | غرناطة | منطقة مميزة",
+                  "value": "شقة غرفة نوم واحدة أنيقة | غرناطة | منطقة مميزة"
+                },
+                {
+                  "name": "استثمر الان | تشطيب عصري | اطلالة فاخرة ",
+                  "value": "استثمر الان | تشطيب عصري | اطلالة فاخرة "
+                },
+                {
+                  "name": "فيلا سنجل روو من 3 غرف | مساحة ساشعة | التسليم قريبا",
+                  "value": "فيلا سنجل روو من 3 غرف | مساحة ساشعة | التسليم قريبا"
+                },
+                {
+                  "name": "استلم قريبًا! فيلا راقية 5 غرف في في الريمان 1 – الشامخة",
+                  "value": "استلم قريبًا! فيلا راقية 5 غرف في في الريمان 1 – الشامخة"
+                },
+                {
+                  "name": "استثمر أسلوب حياة راقٍ في مجتمع متكامل الخدمات",
+                  "value": "استثمر أسلوب حياة راقٍ في مجتمع متكامل الخدمات"
+                },
+                {
+                  "name": "امتلك الان | شقة فاخرة غرفة واحدة | افضل سعر",
+                  "value": "امتلك الان | شقة فاخرة غرفة واحدة | افضل سعر"
+                },
+                {
+                  "name": "وحدة فريدة من نوعها | وحدة زاوية | إطلالات مذهلة",
+                  "value": "وحدة فريدة من نوعها | وحدة زاوية | إطلالات مذهلة"
+                },
+                {
+                  "name": "امتلك شقتك بإطلالة مانغروف ساحرة قبل الارتفاع!",
+                  "value": "امتلك شقتك بإطلالة مانغروف ساحرة قبل الارتفاع!"
+                },
+                {
+                  "name": "فيلا أنيقة 4 غرف | طراز متوسطي راقٍ",
+                  "value": "فيلا أنيقة 4 غرف | طراز متوسطي راقٍ"
+                },
+                {
+                  "name": "تصميم متوسطي | 5 غرف نوم | التسليم قريباً",
+                  "value": "تصميم متوسطي | 5 غرف نوم | التسليم قريباً"
+                },
+                {
+                  "name": "كورنر I تاون هاوس 3 غرف نوم مع حديقة خاصة",
+                  "value": "كورنر I تاون هاوس 3 غرف نوم مع حديقة خاصة"
+                },
+                {
+                  "name": "فرصه لاتعوض شقه غرفتين مفروشه بالكامل تصميم مميز",
+                  "value": "فرصه لاتعوض شقه غرفتين مفروشه بالكامل تصميم مميز"
+                },
+                {
+                  "name": "امتلك الان شقه قمه فى الفخامه والروعه مميزه",
+                  "value": "امتلك الان شقه قمه فى الفخامه والروعه مميزه"
+                },
+                {
+                  "name": "فيلا 5 غرف نوم صف اول علي زاوية",
+                  "value": "فيلا 5 غرف نوم صف اول علي زاوية"
+                },
+                {
+                  "name": "حيث الخصوصية تلتقي بالفخامة | تاون هاوس واسع 4 غرف",
+                  "value": "حيث الخصوصية تلتقي بالفخامة | تاون هاوس واسع 4 غرف"
+                },
+                {
+                  "name": "تملك شقه تصميم عصرى حديث ومميز جدا",
+                  "value": "تملك شقه تصميم عصرى حديث ومميز جدا"
+                },
+                {
+                  "name": "استوديو واسع | إطلالة مثالية | افضل سعر ",
+                  "value": "استوديو واسع | إطلالة مثالية | افضل سعر "
+                },
+                {
+                  "name": "غرناطة | غرفة نوم واحدة | حياة فاخرة",
+                  "value": "غرناطة | غرفة نوم واحدة | حياة فاخرة"
+                },
+                {
+                  "name": "استديو باطلاله على القنال | طابق مرتفع | استثمر الان",
+                  "value": "استديو باطلاله على القنال | طابق مرتفع | استثمر الان"
+                },
+                {
+                  "name": "افضل سعر | تاون هاوس غرفتين | تشطيب عصري",
+                  "value": "افضل سعر | تاون هاوس غرفتين | تشطيب عصري"
+                },
+                {
+                  "name": "شقة فاخرة | في الطوابق العلياء | كورنر ",
+                  "value": "شقة فاخرة | في الطوابق العلياء | كورنر "
+                },
+                {
+                  "name": " شقة فاخرة | في الطوابق العلياء | كورنر",
+                  "value": " شقة فاخرة | في الطوابق العلياء | كورنر"
+                },
+                {
+                  "name": "غرفة نوم واحدة | إطلالة على الحديقة | غرناطة",
+                  "value": "غرفة نوم واحدة | إطلالة على الحديقة | غرناطة"
+                },
+                {
+                  "name": "مبنى ألبا | غرفتا نوم | إطلالة على القناة",
+                  "value": "مبنى ألبا | غرفتا نوم | إطلالة على القناة"
+                },
+                {
+                  "name": "شقة فاخرة | مجتمع راقي | في الطوابق العليا",
+                  "value": "شقة فاخرة | مجتمع راقي | في الطوابق العليا"
+                },
+                {
+                  "name": "موقع مميز | معيشة مريحة | إطلالات هادئة",
+                  "value": "موقع مميز | معيشة مريحة | إطلالات هادئة"
+                },
+                {
+                  "name": "طابق مرتفع | مساحة معيشة واسعة | إطلالة على القناة",
+                  "value": "طابق مرتفع | مساحة معيشة واسعة | إطلالة على القناة"
+                },
+                {
+                  "name": "امتلك الان شقه | غرفة نوم واحدة مع شرفة | مسبح مجتمعي",
+                  "value": "امتلك الان شقه | غرفة نوم واحدة مع شرفة | مسبح مجتمعي"
+                },
+                {
+                  "name": "امتلك الان شقة فاخر | كورنر | تشطيب عصري",
+                  "value": "امتلك الان شقة فاخر | كورنر | تشطيب عصري"
+                },
+                {
+                  "name": "شقة غرفتين نوم ساحرة | موقع مثالي | غرناطة",
+                  "value": "شقة غرفتين نوم ساحرة | موقع مثالي | غرناطة"
+                },
+                {
+                  "name": "استثمر الان | مساحة واسعة | تطشيب عصري ",
+                  "value": "استثمر الان | مساحة واسعة | تطشيب عصري "
+                },
+                {
+                  "name": "استثمر الان | شقة فاخرة | مساحة واسعة ",
+                  "value": "استثمر الان | شقة فاخرة | مساحة واسعة "
+                },
+                {
+                  "name": "فرصة ذهبية لامتلاك شقة أحلامك بموقع مميز",
+                  "value": "فرصة ذهبية لامتلاك شقة أحلامك بموقع مميز"
+                },
+                {
+                  "name": "استثمر الان | شقة فاخرة | عائد استثماري عالي",
+                  "value": "استثمر الان | شقة فاخرة | عائد استثماري عالي"
+                },
+                {
+                  "name": "شرفتان | إطلالة على الواجهة البحرية | دوبلكس",
+                  "value": "شرفتان | إطلالة على الواجهة البحرية | دوبلكس"
+                },
+                {
+                  "name": "امتلك الان | استوديو فاخر | سعر ممتاز ",
+                  "value": "امتلك الان | استوديو فاخر | سعر ممتاز "
+                },
+                {
+                  "name": "استديو عصري | استثمار ممتاز | تملك الان",
+                  "value": "استديو عصري | استثمار ممتاز | تملك الان"
+                },
+                {
+                  "name": "سعر ممتاز | شقة فاخرة غرفتين نوم | مساحة واسعة ",
+                  "value": "سعر ممتاز | شقة فاخرة غرفتين نوم | مساحة واسعة "
+                },
+                {
+                  "name": "مرافق فاخرة | إطلاق جديد | منظر الشارع",
+                  "value": "مرافق فاخرة | إطلاق جديد | منظر الشارع"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_DESCRIPTION_EN",
+              "displayName": "UNIT_DESCRIPTION_EN",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "TITLE_EN",
+              "displayName": "TITLE_EN",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "unit_type",
+              "displayName": "unit_type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lifestyle",
+              "displayName": "lifestyle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bathroom",
+              "displayName": "bathroom",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UNIT_DESCRIPTION_AR",
+              "displayName": "UNIT_DESCRIPTION_AR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "post_status",
+              "displayName": "post_status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Created",
+                  "value": "Created"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updatedAt",
+              "displayName": "updatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "reference image ",
+              "displayName": "reference image ",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2224,
+        720
+      ],
+      "id": "b192f8c5-d0cd-4f75-8bfa-e12935297cd9",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1664,
+        -112
+      ],
+      "id": "787b4751-2a6b-4a25-9c84-bb99d4b1e26b",
+      "name": "Wait",
+      "webhookId": "826233b3-b347-4ed0-b42e-25a79e30ee54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "owner",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        320
+      ],
+      "id": "f148030c-8a81-4fa3-874b-80503c9e0bff",
+      "name": "Share file",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "14klUmP2Lgv3DzoJ06ZNH6t6aiC-5CsU2",
+          "mode": "list",
+          "cachedResultName": "WhatsApp Image 2026-01-27 at 12.31.24 PM (1).jpeg",
+          "cachedResultUrl": "https://drive.google.com/file/d/14klUmP2Lgv3DzoJ06ZNH6t6aiC-5CsU2/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        656,
+        320
+      ],
+      "id": "b37a3b4f-6502-47fb-8517-e3b2f60abde3",
+      "name": "Download file1",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "XML1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML1": {
+      "main": [
+        [
+          {
+            "node": "XML2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML2": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        []
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        []
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "db75edc8-9384-44c2-b00e-5e7831ad88c7",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "sr-hgY7LhbS4GIbC8vMIq",
+  "tags": []
+}

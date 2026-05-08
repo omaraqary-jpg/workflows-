@@ -1,0 +1,990 @@
+{
+  "name": "AQARY- Units Social media Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "person": "VmLVZfbc5Y",
+        "text": "={{ $('Loop Over Items1').item.json['Post Content'] }}",
+        "shareMediaCategory": "IMAGE",
+        "binaryPropertyName": "Image_0",
+        "additionalFields": {
+          "title": "={{ $('Loop Over Items1').item.json['Post Title'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        208,
+        592
+      ],
+      "id": "32932c2d-3922-4a4c-8e83-f1532d984382",
+      "name": "Create a post",
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fde13f2d-bb29-4716-b4b4-980fbaa1b7cb",
+              "leftValue": "={{ $json['post status'] }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1344,
+        464
+      ],
+      "id": "6e623858-1566-44d8-a98d-f86ac1b4cad9",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        736
+      ],
+      "id": "f4d9fb3d-4a4f-4d98-906d-51f7802157e8",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1664,
+        464
+      ],
+      "id": "fff9d06f-34e8-4b68-864c-d9eaa6bfcf01",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblB2j39PtH5wdRRQ",
+          "mode": "list",
+          "cachedResultName": "Gen_AI_Social_Media_Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblB2j39PtH5wdRRQ"
+        },
+        "filterByFormula": "{post status} = 'Approved'",
+        "returnAll": false,
+        "options": {
+          "downloadFields": [
+            "Image"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -1504,
+        464
+      ],
+      "id": "1a7d46b9-2f6c-47fb-8810-dc9e3109d91f",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1008,
+        448
+      ],
+      "id": "0fa6d663-98e0-42c2-bb72-2000570c1223",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "Instagram",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "a9ff0e2c-77ed-4119-a4ff-de3190824209"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Instagram"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c70a9e91-266b-4b12-b8bd-8e7b51f422a2",
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "Facebook",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1029436d-f9d3-4579-874a-7fd7d222d3fd",
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "Twitter",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Twitter"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b584037b-217f-4512-ae1e-abb0b79ba067",
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "LinkedIn",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LinkedIn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cfc24705-e698-44b4-b55c-d04bfb150d93",
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "TikTok",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TikTok"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c73f7bfe-ed84-47bb-bad4-8b96e95c47b7",
+                    "leftValue": "={{ JSON.stringify($json.Platform) }}",
+                    "rightValue": "Blog",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Blog"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        400
+      ],
+      "id": "073371ec-1d96-45a9-a436-7c5420a93b7c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        208,
+        368
+      ],
+      "id": "4973982a-f0cf-4ab6-9d92-09d3c9537616",
+      "name": "Create Tweet",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        784
+      ],
+      "id": "600444fc-741d-45af-affe-bf4ec67e0c78",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        992
+      ],
+      "id": "cd03be3b-e31e-449f-a096-e22b24b847eb",
+      "name": "HTTP Request2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appiG5gpAj9kTx5cm",
+          "mode": "list",
+          "cachedResultName": "AQARY PROPERTIES",
+          "cachedResultUrl": "https://airtable.com/appiG5gpAj9kTx5cm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbloDUMttKzTByMbS",
+          "mode": "list",
+          "cachedResultName": "Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appiG5gpAj9kTx5cm/tbloDUMttKzTByMbS"
+        },
+        "id": "={{ $('Loop Over Items1').item.json.id }}",
+        "options": {
+          "downloadFields": [
+            "Image"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        592
+      ],
+      "id": "f21b276a-4524-4568-8d2d-aaf33f0e216d",
+      "name": "Get a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        32
+      ],
+      "id": "7d5072c7-1f73-422f-a410-84e49d95d754",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "6b0f4858-cf07-44b0-b1e1-521676ce9f4d",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        544,
+        416
+      ],
+      "id": "6e888895-68c8-482e-97cf-cb2dd5ea3609",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblB2j39PtH5wdRRQ",
+          "mode": "list",
+          "cachedResultName": "Gen_AI_Social_Media_Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblB2j39PtH5wdRRQ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UNIT_ID": "={{ $('Loop Over Items1').item.json.UNIT_ID }}",
+            "post status": "Posted",
+            "Post Date": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "UNIT_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "UNIT_ID",
+              "displayName": "UNIT_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Post Title",
+              "displayName": "Post Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Image",
+              "displayName": "Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "TikTok",
+                  "value": "TikTok"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "Twitter",
+                  "value": "Twitter"
+                },
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Properties",
+              "displayName": "Properties",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "post status",
+              "displayName": "post status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                },
+                {
+                  "name": "Waiting For Approval",
+                  "value": "Waiting For Approval"
+                },
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Post Date",
+              "displayName": "Post Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Social Media Posts",
+              "displayName": "Social Media Posts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "From field: Social Media Posts",
+              "displayName": "From field: Social Media Posts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "post status (from Social Media Posts)",
+              "displayName": "post status (from Social Media Posts)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        784,
+        480
+      ],
+      "id": "9b858536-f15e-4a32-884a-b35071491c4d",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 AQARY PUBLISHING ENGINE v1.0\n\n**Objective:**\nAutomatically publish \"Approved\" content from Airtable to live social media channels.\n\n**Process Flow:**\n1. **Trigger:** Runs every 10-30 mins to check for approvals.\n2. **Fetch:** Pulls records with status **\"Approved\"**.\n3. **Route:** Switches logic based on the `Platform` field (LinkedIn, FB, etc.).\n4. **Publish:** Sends content to the respective API.\n5. **Update:** Marks Airtable record as **\"Posted\"** to prevent duplicates.\n\n**Safety:**\n- Only processes 1 item at a time (Loop).\n- Requires manual approval in Airtable before execution.\n",
+        "height": 1152,
+        "width": 576,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        0
+      ],
+      "id": "a2c63222-1a6f-4433-9c42-90e9922beb5a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 📥 APPROVAL QUEUE\n\n**Logic:**\n- Filters Airtable for `{post status} = 'Approved'`.\n- **Note:** Only fetches records that are ready to go live.\n- **Optimization:** Downloads 'Image' field immediately to avoid re-fetching later.\n\n**Loop:**\n- Iterates through approved posts one by one.\n- Ensures stable API calls to social platforms.\n",
+        "height": 1152,
+        "width": 560,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        0
+      ],
+      "id": "0813f88a-a04c-4bd2-ae5a-ce32bfd674fa",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🔀 PLATFORM ROUTING\n\n**Switch Node:**\n- Reads the `Platform` field from Airtable.\n- **Routes:**\n  - **LinkedIn:** -> Create Post Node\n  - **Instagram:** -> Publish Node\n  - **Facebook:** -> Graph API Node\n  - **Twitter/X:** -> Tweet Node\n\n**Scalability:**\n- Easy to add new platforms (TikTok/Blog) by adding new Switch rules.\n",
+        "height": 1152,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        0
+      ],
+      "id": "74d21427-b678-40c0-8e89-7dd57a1a514c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 📡 LIVE PUBLISHING\n\n**Nodes:**\n- **LinkedIn:** Posts text + image as a \"Share\".\n- **Instagram/FB:** Uses Graph API for media publishing.\n- **HTTP Requests:** Custom API calls for other platforms.\n\n**Critical Config:**\n- Ensure OAuth2 credentials are active.\n- Images must be valid public URLs (from Airtable).\n\n",
+        "height": 1152,
+        "width": 896,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        0
+      ],
+      "id": "85d81907-db05-4308-b7c9-00878111be01",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## ✅ COMPLETION MARKER\n\n**Action:**\n- Updates the original Airtable record.\n- **Status Change:** 'Approved' -> **'Posted'**.\n- **Timestamp:** Adds `Scheduled Date` = Today.\n\n**Importance:**\n- Removes the item from the \"Approved\" queue.\n- Prevents double-posting in the next schedule run.\n",
+        "height": 1152,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "9a105b95-6f28-4b35-8529-3fc7482ea484",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "298864279967900",
+        "edge": "photos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "Image_0",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $json['Post Content'] }}"
+              },
+              {
+                "name": "link",
+                "value": "={{ $json.Image[0].url }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "1feaa2af-777c-4ce1-8a73-150a06dd7536",
+      "name": "Facebook Graph API1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Facebook Graph API1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tweet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Get a record": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing3": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "wASx36bdFTlubpGhe8lV6"
+  },
+  "versionId": "120c283f-ad85-4088-bbf6-0321e4cf51d9",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "roFjhBB4io3vQ6KyXGrj8",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    }
+  ]
+}

@@ -1,0 +1,4672 @@
+{
+  "name": "FineHome Social Media Publish Schedule",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        608
+      ],
+      "id": "3b759501-b732-449b-83d1-63b855545d59",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 640,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        208
+      ],
+      "id": "c8e87882-a8b3-49fc-bede-6111d13e875c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "4b6ded4f-dcba-49c5-99ec-d9212626c678",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app1Qptqqwyqm8YFw",
+          "mode": "list",
+          "cachedResultName": "Publishing Schedule",
+          "cachedResultUrl": "https://airtable.com/app1Qptqqwyqm8YFw"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl10FpzGEF9WPX99",
+          "mode": "list",
+          "cachedResultName": "Publishing Schedules",
+          "cachedResultUrl": "https://airtable.com/app1Qptqqwyqm8YFw/tbl10FpzGEF9WPX99"
+        },
+        "filterByFormula": "={Weekday}=\"{{ $json.WeekDay }}\"",
+        "options": {
+          "fields": [
+            "Facebook",
+            "Instagram",
+            "LinkedIn",
+            "TikTok",
+            "YouTube",
+            "Weekday",
+            "Twitter"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        736
+      ],
+      "id": "09bd2a66-4c7d-4c95-8902-47bd6ef58ebc",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "accountId": {
+          "__rl": true,
+          "value": "30675",
+          "mode": "list",
+          "cachedResultName": "finehome.realestate",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/30675"
+        },
+        "postContentText": "={{ $('Loop Over Items1').item.json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        736
+      ],
+      "id": "59933182-e873-4737-be1b-483db23c7c30",
+      "name": "Create Instagram post1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "platform": "facebook",
+        "accountId": {
+          "__rl": true,
+          "value": "19555",
+          "mode": "list",
+          "cachedResultName": "Ashraf Erian",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/19555"
+        },
+        "postContentText": "={{ $('Loop Over Items1').item.json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}",
+        "facebookPageId": {
+          "__rl": true,
+          "value": "298864279967900",
+          "mode": "list",
+          "cachedResultName": "Fine Home Real Estate",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/19555/subaccounts/298864279967900"
+        },
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        48
+      ],
+      "id": "a51a7962-fd29-4452-a13d-e110b5ce326a",
+      "name": "Create Facebook post1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.nowDubai }}",
+        "format": "custom",
+        "customFormat": "EEE",
+        "outputFieldName": "WeekDay",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "68dd1440-8ae8-48a4-a93b-5135143ff95a",
+      "name": "Get Weekday1"
+    },
+    {
+      "parameters": {
+        "outputFieldName": "nowDubai",
+        "options": {
+          "includeInputFields": true,
+          "timezone": "Asia/Dubai"
+        }
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        128,
+        0
+      ],
+      "id": "1470b789-4cdc-4ed3-a733-8abfb03a5b60",
+      "name": "Get Current Date & Time1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractStartHHMM(s) {\n  s = (s || '').toString().trim();\n  if (!s || /low activity/i.test(s)) return '';\n\n  // ما نعمل split على comma هنا - نأخذ أول وقت في النص\n  const m = s.match(/(\\d{1,2})(?::(\\d{2}))?\\s*(AM|PM)?/i);\n  if (!m) return '';\n\n  let hour = parseInt(m[1], 10);\n  const min = m[2] ? parseInt(m[2], 10) : 0;\n  const ampm = (m[3] || (s.match(/\\b(AM|PM)\\b/i)?.[1]) || '').toUpperCase();\n\n  if (ampm === 'PM' && hour !== 12) hour += 12;\n  if (ampm === 'AM' && hour === 12) hour = 0;\n\n  return String(hour).padStart(2,'0') + ':' + String(min).padStart(2,'0');\n}\n\nfunction extractEndHHMM(s) {\n  s = (s || '').toString().trim();\n  if (!s || /low activity/i.test(s)) return '';\n\n  // نبحث عن dash (أي نوع) ثم آخر وقت\n  const parts = s.split(/\\s*[-–—−]\\s*/); // أضفت − (minus sign)\n  if (parts.length < 2) return '';\n\n  const last = parts[parts.length - 1].trim();\n  const m = last.match(/(\\d{1,2})(?::(\\d{2}))?\\s*(AM|PM)?/i);\n  if (!m) return '';\n\n  let hour = parseInt(m[1], 10);\n  const min = m[2] ? parseInt(m[2], 10) : 0;\n  const ampm = (m[3] || (last.match(/\\b(AM|PM)\\b/i)?.[1]) || '').toUpperCase();\n\n  if (ampm === 'PM' && hour !== 12) hour += 12;\n  if (ampm === 'AM' && hour === 12) hour = 0;\n\n  return String(hour).padStart(2,'0') + ':' + String(min).padStart(2,'0');\n}\n\nfunction extractSecondWindow(s) {\n  s = (s || '').toString().trim();\n  if (!s) return { start: '', end: '' };\n\n  const parts = s.split(',');\n  if (parts.length < 2) return { start: '', end: '' };\n\n  const secondPart = parts[1].trim(); // \"11:00 AM - 03:00 PM\"\n  \n  return {\n    start: extractStartHHMM(secondPart),\n    end: extractEndHHMM(secondPart)\n  };\n}\n\nreturn $input.all().map(item => {\n  const j = { ...item.json };\n\n  // Facebook - primary window (قبل أول comma)\n  const fbParts = (j.Facebook || '').split(',');\n  j.facebook_hhmm = extractStartHHMM(fbParts[0] || '');\n  j.facebook_end_hhmm = extractEndHHMM(fbParts[0] || '');\n  const fbSecond = extractSecondWindow(j.Facebook);\n  j.facebook_second_hhmm = fbSecond.start;\n  j.facebook_second_end_hhmm = fbSecond.end;\n\n  // Instagram\n  const igParts = (j.Instagram || '').split(',');\n  j.instagram_hhmm = extractStartHHMM(igParts[0] || '');\n  j.instagram_end_hhmm = extractEndHHMM(igParts[0] || '');\n  const igSecond = extractSecondWindow(j.Instagram);\n  j.instagram_second_hhmm = igSecond.start;\n  j.instagram_second_end_hhmm = igSecond.end;\n\n  // LinkedIn\n  const liParts = (j.LinkedIn || '').split(',');\n  j.linkedin_hhmm = extractStartHHMM(liParts[0] || '');\n  j.linkedin_end_hhmm = extractEndHHMM(liParts[0] || '');\n  const liSecond = extractSecondWindow(j.LinkedIn);\n  j.linkedin_second_hhmm = liSecond.start;\n  j.linkedin_second_end_hhmm = liSecond.end;\n\n  // TikTok\n  const tkParts = (j.TikTok || '').split(',');\n  j.tiktok_hhmm = extractStartHHMM(tkParts[0] || '');\n  j.tiktok_end_hhmm = extractEndHHMM(tkParts[0] || '');\n  const tkSecond = extractSecondWindow(j.TikTok);\n  j.tiktok_second_hhmm = tkSecond.start;\n  j.tiktok_second_end_hhmm = tkSecond.end;\n\n  // YouTube\n  const ytParts = (j.YouTube || '').split(',');\n  j.youtube_hhmm = extractStartHHMM(ytParts[0] || '');\n  j.youtube_end_hhmm = extractEndHHMM(ytParts[0] || '');\n  const ytSecond = extractSecondWindow(j.YouTube);\n  j.youtube_second_hhmm = ytSecond.start;\n  j.youtube_second_end_hhmm = ytSecond.end;\n\n  // Twitter\n  const twParts = (j.Twitter || '').split(',');\n  j.twitter_hhmm = extractStartHHMM(twParts[0] || '');\n  j.twitter_end_hhmm = extractEndHHMM(twParts[0] || '');\n  const twSecond = extractSecondWindow(j.Twitter);\n  j.twitter_second_hhmm = twSecond.start;\n  j.twitter_second_end_hhmm = twSecond.end;\n\n  return { json: j };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        736
+      ],
+      "id": "9b2344a6-b084-4ad7-ba86-0231652e43d3",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+        "format": "custom",
+        "customFormat": "yyyy-LL-dd",
+        "outputFieldName": "dateOnly",
+        "options": {
+          "includeInputFields": true
+        }
+      },
+      "id": "0c4468ea-2452-4e40-a898-9579e3b3de46",
+      "name": "Get DateOnly1",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.facebook_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f502b2ad-5d13-44ee-ad25-4a1d1e9fe58b",
+      "name": "If FB Time Exists5",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_facebook }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_facebook_end).toISO() }}\n\n\n",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "9d4d24d1-bda8-440f-b825-c319eae29a89",
+      "name": "If Within 5min Window5",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        -304
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const dateOnly = $('Get DateOnly1').item.json.dateOnly;\n\nreturn $input.all().map(item => {\n  const j = { ...item.json };\n\n  // Primary windows\n  j.scheduled_time_facebook = j.facebook_hhmm ? `${dateOnly}T${j.facebook_hhmm}:00+04:00` : '';\n  j.scheduled_time_facebook_end = j.facebook_end_hhmm ? `${dateOnly}T${j.facebook_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_instagram = j.instagram_hhmm ? `${dateOnly}T${j.instagram_hhmm}:00+04:00` : '';\n  j.scheduled_time_instagram_end = j.instagram_end_hhmm ? `${dateOnly}T${j.instagram_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_linkedin = j.linkedin_hhmm ? `${dateOnly}T${j.linkedin_hhmm}:00+04:00` : '';\n  j.scheduled_time_linkedin_end = j.linkedin_end_hhmm ? `${dateOnly}T${j.linkedin_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_tiktok = j.tiktok_hhmm ? `${dateOnly}T${j.tiktok_hhmm}:00+04:00` : '';\n  j.scheduled_time_tiktok_end = j.tiktok_end_hhmm ? `${dateOnly}T${j.tiktok_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_youtube = j.youtube_hhmm ? `${dateOnly}T${j.youtube_hhmm}:00+04:00` : '';\n  j.scheduled_time_youtube_end = j.youtube_end_hhmm ? `${dateOnly}T${j.youtube_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_twitter = j.twitter_hhmm ? `${dateOnly}T${j.twitter_hhmm}:00+04:00` : '';\n  j.scheduled_time_twitter_end = j.twitter_end_hhmm ? `${dateOnly}T${j.twitter_end_hhmm}:00+04:00` : '';\n\n  // Secondary windows\n  j.scheduled_time_facebook_second = j.facebook_second_hhmm ? `${dateOnly}T${j.facebook_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_facebook_second_end = j.facebook_second_end_hhmm ? `${dateOnly}T${j.facebook_second_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_instagram_second = j.instagram_second_hhmm ? `${dateOnly}T${j.instagram_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_instagram_second_end = j.instagram_second_end_hhmm ? `${dateOnly}T${j.instagram_second_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_linkedin_second = j.linkedin_second_hhmm ? `${dateOnly}T${j.linkedin_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_linkedin_second_end = j.linkedin_second_end_hhmm ? `${dateOnly}T${j.linkedin_second_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_tiktok_second = j.tiktok_second_hhmm ? `${dateOnly}T${j.tiktok_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_tiktok_second_end = j.tiktok_second_end_hhmm ? `${dateOnly}T${j.tiktok_second_end_hhmm}:00+04:00` : '';\n  j.scheduled_time_youtube_second = j.youtube_second_hhmm ? `${dateOnly}T${j.youtube_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_youtube_second_end = j.youtube_second_end_hhmm ? `${dateOnly}T${j.youtube_second_end_hhmm}:00+04:00` : '';\n   j.scheduled_time_Twitter_second = j.twitter_second_hhmm ? `${dateOnly}T${j.Twitter_second_hhmm}:00+04:00` : '';\n  j.scheduled_time_Twitter_second_end = j.twitter_second_end_hhmm ? `${dateOnly}T${j.Twitter_second_end_hhmm}:00+04:00` : '';\n\n  return { json: j };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        736
+      ],
+      "id": "f7fa0dbe-31d2-47cd-9577-b361c51ade99",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $('Code in JavaScript2').item.json.instagram_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "09fbe246-5bc1-4f44-aceb-46981d4f7e02",
+      "name": "If FB Time Exists6",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_instagram }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_instagram_end).toISO() }}\n",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7aacad71-0457-4a2d-83d5-af1b86a516bf",
+      "name": "If Within 5min Window6",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        320
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.linkedin_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6538f9c6-2022-48bf-af34-2dcd1437346c",
+      "name": "If FB Time Exists7",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        1392
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $('Code in JavaScript3').item.json.scheduled_time_linkedin }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_linkedin_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "99e2e01b-0fa8-4483-bde0-f25a9b802c01",
+      "name": "If Within 5min Window7",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        1040
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2251a6bb-f7c2-498e-ad3e-62916d552dee",
+      "name": "If FB Time Exists8",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_tiktok }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_tiktok_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6cb1be79-5990-4f3e-906f-1f76fa097702",
+      "name": "If Within 5min Window8",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        1760
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Get Waiting Posts\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        -496
+      ],
+      "id": "a4a08f94-2b4b-4c45-859a-33482dd6d4df",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "## Date Logic\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 784,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -496
+      ],
+      "id": "2571c266-c108-4859-b429-21623a19ac3a",
+      "name": "Sticky Note37"
+    },
+    {
+      "parameters": {
+        "content": "## Get Platforms Schedule \n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 784,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        192
+      ],
+      "id": "64abfc91-cf02-4df3-9931-866a8889d27a",
+      "name": "Sticky Note38"
+    },
+    {
+      "parameters": {
+        "content": "## Facebook\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -496
+      ],
+      "id": "e1f520fb-c11f-4092-96e3-343f9c00cab5",
+      "name": "Sticky Note39"
+    },
+    {
+      "parameters": {
+        "content": "## Facebook\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -496
+      ],
+      "id": "30d1ac7d-6be0-4cdd-b537-077ecf2630db",
+      "name": "Sticky Note40"
+    },
+    {
+      "parameters": {
+        "content": "## Facebook\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        -496
+      ],
+      "id": "f5ade6e8-1267-4aa8-8e6c-90aa35b90f3a",
+      "name": "Sticky Note41"
+    },
+    {
+      "parameters": {
+        "content": "## Instagram\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        192
+      ],
+      "id": "e7ce6cd7-35ac-4c36-8747-8e358153ed95",
+      "name": "Sticky Note42"
+    },
+    {
+      "parameters": {
+        "content": "## Instagram\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        192
+      ],
+      "id": "5f5bcfff-b263-49d0-8348-b4cec03a149d",
+      "name": "Sticky Note43"
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        880
+      ],
+      "id": "3b986fde-ee99-4585-a50e-152d11f5e198",
+      "name": "Sticky Note44"
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        880
+      ],
+      "id": "1bf93323-a21a-4753-93ac-b57ff59fa59c",
+      "name": "Sticky Note45"
+    },
+    {
+      "parameters": {
+        "content": "## TikTok\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        1568
+      ],
+      "id": "ac00dfd3-2bce-45dd-9de7-bc9d928e734e",
+      "name": "Sticky Note46"
+    },
+    {
+      "parameters": {
+        "content": "## TikTok \n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        1568
+      ],
+      "id": "b0ea4e5d-36ba-446e-b1da-5cda04a06a58",
+      "name": "Sticky Note47"
+    },
+    {
+      "parameters": {
+        "content": "## TikTok\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        1568
+      ],
+      "id": "a09ab6de-eaf3-4b05-8c0e-dea1c002fae1",
+      "name": "Sticky Note48"
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        880
+      ],
+      "id": "c62bcad0-6be2-41ce-9c95-050a7d3d9307",
+      "name": "Sticky Note49"
+    },
+    {
+      "parameters": {
+        "content": "## Instagram\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        192
+      ],
+      "id": "6e5042c9-cb05-4491-8a51-4f3af102e0fb",
+      "name": "Sticky Note50"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.youtube_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e19785fa-a1ce-49d6-9e37-34cd1475f2a3",
+      "name": "If FB Time Exists9",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        2768
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_youtube }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_youtube_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "df317b5b-f0c1-48be-8e7b-ceb7c9c1144f",
+      "name": "If Within 5min Window9",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        2432
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## YouTube\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        2256
+      ],
+      "id": "97dffaac-7827-47ea-b4e9-bbd7b1b53caa",
+      "name": "Sticky Note51"
+    },
+    {
+      "parameters": {
+        "content": "## YouTube\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        2256
+      ],
+      "id": "fea995de-edc9-49bf-a43c-dbf6b60c341a",
+      "name": "Sticky Note52"
+    },
+    {
+      "parameters": {
+        "content": "## YouTube\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        2256
+      ],
+      "id": "c2be9a6a-6359-4886-b1dc-9ee8b03c92f2",
+      "name": "Sticky Note53"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "YouTube Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2256,
+        2656
+      ],
+      "id": "2e20c9d2-e876-46a2-b199-4428eaaa7a43",
+      "name": "Update YouTube Status1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "TikTok Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2256,
+        1968
+      ],
+      "id": "0003486d-19c6-4c81-b20f-cb5f129ae7bb",
+      "name": "Update TikTok Status1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "LinkedIn Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2256,
+        1280
+      ],
+      "id": "3549d4bf-27a5-44c5-86f8-583a8ab3babc",
+      "name": "Update LinkedIn Status1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "Instagram Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2272,
+        528
+      ],
+      "id": "b921fc0d-7a8c-467e-ba37-022f0bbea9cc",
+      "name": "Update Instagram Status1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "Facebook Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Date Posted",
+              "displayName": "Date Posted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2272,
+        -112
+      ],
+      "id": "26d108fb-d9e8-4dc8-bee4-e5509e9d9fa6",
+      "name": "Update Facebook Status1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "platform": "linkedin",
+        "accountId": {
+          "__rl": true,
+          "value": "30949",
+          "mode": "list",
+          "cachedResultName": "omar_aboulwaffa",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/30949"
+        },
+        "postContentText": "={{ $('Loop Over Items1').item.json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}{{ $('Loop Over Items1').item.json['Post Image'][0].url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        1392
+      ],
+      "id": "0e7a3baf-3d52-41b7-b670-3737e26ae803",
+      "name": "Create LinkedIn post1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "platform": "tiktok",
+        "accountId": {
+          "__rl": true,
+          "value": "29107",
+          "mode": "list",
+          "cachedResultName": "finehomereales199",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/29107"
+        },
+        "postContentText": "={{ $('Loop Over Items1').item.json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json.url }}",
+        "postCreateTiktokOptionAutoAddMusic": true,
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        2096
+      ],
+      "id": "728a7eac-6189-4794-b94e-63ea72dab4af",
+      "name": "Create TikTok post1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "source",
+        "sourceUrl": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        2784
+      ],
+      "id": "602cd29f-a32e-40da-9365-49d438078b2b",
+      "name": "Create YouTube Status post1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2656,
+        1232
+      ],
+      "id": "3248233d-51bf-4413-81ba-a39f59a93552",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "mediaUrl": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        736
+      ],
+      "id": "d33f03c1-99ee-4da3-959c-1903590ce993",
+      "name": "Upload media",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "mediaUrl": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        2784
+      ],
+      "id": "6a0d4bc6-9bb9-4c6e-979a-8b5459ff1b0c",
+      "name": "Upload media1",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "mediaUrl": "={{ $json.images[0] }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        2096
+      ],
+      "id": "98d7ae71-4823-414e-8cd7-5adbfb798b5a",
+      "name": "Upload media2",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d6e0fee6-aa5c-4f94-88e9-0071d6f1752b",
+      "name": "If FB Time Exists10",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_tiktok_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_tiktok_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "33a07c70-acae-423d-8ec3-5314937240cf",
+      "name": "If Within 5min Window10",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        1760
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6bcb7ed6-b5b7-4afe-a898-a566568c4802",
+      "name": "If FB Time Exists11",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_facebook_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_facebook_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c51047a4-5d3f-44ca-9f36-940f056643dc",
+      "name": "If Within 5min Window11",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -288
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "68e210bd-98af-44ed-93b6-47ca4e2c4056",
+      "name": "If FB Time Exists12",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_instagram_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_instagram_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1f2af4e0-6cf3-45d1-b97d-e1ebf7752473",
+      "name": "If Within 5min Window12",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        320
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "119ecde3-816a-4647-9cb1-68c6214df45e",
+      "name": "If FB Time Exists13",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        1392
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_linkedin_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_linkedin_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0bf4f7b3-61ca-46d2-b13b-f60cbc2a34d7",
+      "name": "If Within 5min Window13",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        1056
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ecfd2ac3-d2d2-4378-8818-c51375ba6be1",
+      "name": "If FB Time Exists14",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        2768
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_youtube_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_youtube_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d20096b5-97fc-408d-b03e-97573ce9e125",
+      "name": "If Within 5min Window14",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        2432
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nanobananas.ai/api/v1/images/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 0e6bea67-add8-4df6-a710-94ddc8299c5c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "Please fit this photo size with max 1080 without losing quality, to be aligned with TikTok Image restrictions "
+            },
+            {
+              "name": "model",
+              "value": "gemini-2.5-flash-image-preview"
+            },
+            {
+              "name": "imageUrl",
+              "value": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1472,
+        2096
+      ],
+      "id": "f72dddf5-7bab-4b9b-9085-0b4eff7fbe45",
+      "name": "HTTP Request",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.linkedin_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.linkedin_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.linkedin_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.linkedin_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        944
+      ],
+      "id": "43269df3-aa6e-41b5-81d0-efd3cd7595ff",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.facebook_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.facebook_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.facebook_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.facebook_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        -480
+      ],
+      "id": "ee6a2ac7-eecc-4ff6-9629-193026e57979",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.instagram_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.instagram_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.instagram_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.instagram_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        224
+      ],
+      "id": "8cf73bf2-ba7e-46df-94aa-9a774c84de95",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.tiktok_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.tiktok_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.tiktok_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.tiktok_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        1648
+      ],
+      "id": "933bbb10-483b-4d49-a979-61b2db516d3b",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.youtube_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.youtube_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.youtube_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.youtube_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        2304
+      ],
+      "id": "39cf5bed-eaad-4874-b6cf-600384839e8d",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nanobananas.ai/api/v1/images/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 0e6bea67-add8-4df6-a710-94ddc8299c5c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "Please fit this photo size with max 1080 without losing quality, to be aligned with TikTok Image restrictions "
+            },
+            {
+              "name": "model",
+              "value": "gemini-2.5-flash-image-preview"
+            },
+            {
+              "name": "imageUrl",
+              "value": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1440,
+        2784
+      ],
+      "id": "562faa29-369f-446b-8391-49d48cc4ffd8",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('FineHome Social Media').item.json['YouTube Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        2624
+      ],
+      "id": "7d5a0c36-11ba-4f43-9b55-12a02602b612",
+      "name": "YouTube Post status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('FineHome Social Media').item.json['TikTok Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        1936
+      ],
+      "id": "d7b2572e-12c5-45f2-b142-46cb9569674e",
+      "name": "TikTok Post status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['YouTube Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        2624
+      ],
+      "id": "7061f83d-4833-453d-8bbe-6fd6f7ff80e5",
+      "name": "YouTube Post status1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['TikTok Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        1936
+      ],
+      "id": "db869aa3-5b79-451e-9ef5-ec9066d37e4f",
+      "name": "TikTok Post status1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['LinkedIn Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        1248
+      ],
+      "id": "d590b80d-574c-4b19-83b4-1a45ba6b7ed5",
+      "name": "LinkedIn Post status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['LinkedIn Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        1248
+      ],
+      "id": "2a46c750-88a3-4f4f-9f6b-31cd200198f4",
+      "name": "LinkedIn Post status1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['Instagram Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        544
+      ],
+      "id": "f87fa198-9f37-4043-8b51-ea60dee0b6e3",
+      "name": "Instagram Post status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['Instagram Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        544
+      ],
+      "id": "6144d5f4-0da2-45e8-ad83-53433758c7c9",
+      "name": "Instagram Post status1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['Facebook Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "f8792271-f684-4224-8368-5f99077bbe1d",
+      "name": "Facebook Status Post status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['Facebook Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        -128
+      ],
+      "id": "673e1fd8-a6be-4ec1-b154-4fd246517a30",
+      "name": "Facebook Status Post status1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "filterByFormula": "OR({Facebook Status}=\"Waiting\", {Instagram Status}=\"Waiting\", {LinkedIn Status}=\"Waiting\", {TikTok Status}=\"Waiting\", {YouTube Status}=\"Waiting\", {Twitter Status}=\"Waiting\")",
+        "options": {
+          "fields": [
+            "Post Text",
+            "Facebook Status",
+            "Instagram Status",
+            "LinkedIn Status",
+            "TikTok Status",
+            "YouTube Status",
+            "Post Image",
+            "Twitter Status"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -16
+      ],
+      "id": "ed4d8e14-c5d7-48f1-a73f-026eb26e3cd9",
+      "name": "FineHome Social Media",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.twitter_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "04dd699c-9d10-4da2-baf9-b6a344ea9dc2",
+      "name": "If FB Time Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        3552
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_twitter }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_twitter_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8bf91b5d-8ee5-4874-9952-188f27faac54",
+      "name": "If Within 5min Window",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        3216
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## X\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        3040
+      ],
+      "id": "5609bc7f-50dd-40c1-933c-7568aaaef2ad",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## X\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        3040
+      ],
+      "id": "c42d5c16-49db-4f92-8c3c-9f900b2d127b",
+      "name": "Sticky Note54"
+    },
+    {
+      "parameters": {
+        "content": "## X\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 656,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        3040
+      ],
+      "id": "eba26014-59a2-4652-a40b-4f6a6557f312",
+      "name": "Sticky Note55"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "mediaUrl": "={{ $('Loop Over Items1').item.json['Post Image'][0].url }}"
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        3568
+      ],
+      "id": "89c99eb5-b17b-4e9b-b69d-0a7af34336dd",
+      "name": "Upload media3",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb-exists-check",
+              "leftValue": "={{ $json.twitter_hhmm }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1074a70b-fde7-4204-89b0-68a3dc9025e7",
+      "name": "If FB Time Exists15",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        3552
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "window-start",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ $json.scheduled_time_twitter_second }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "window-end",
+              "leftValue": "={{ $('Get Current Date & Time1').item.json.nowDubai }}",
+              "rightValue": "={{ DateTime.fromISO($json.scheduled_time_Twitter_second_end).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "36447626-f508-4ace-9248-7b37d9841caf",
+      "name": "If Within 5min Window15",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        3216
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7becf43-5343-4781-b144-bca0108fa400",
+              "leftValue": "={{ $json.twitter_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "90e3f32f-ae75-4c45-b8de-85ee2e1142e3",
+              "leftValue": "={{ $json.twitter_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7338c75e-448f-49ff-922e-31a94e1282e0",
+              "leftValue": "={{ $json.twitter_second_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80833568-30b5-48ed-9a97-30af2ac8ad2e",
+              "leftValue": "={{ $json.twitter_second_end_hhmm }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        3088
+      ],
+      "id": "8893e438-6704-4e90-80b6-a189bdc00533",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Great-FineHome Social Media').item.json['Twitter Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        3408
+      ],
+      "id": "228dd81f-3135-4294-b7ad-c95a45d1f848",
+      "name": "YouTube Post status2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c535219-1f66-4e67-b47e-fce4c91e98ae",
+              "leftValue": "={{ $('Loop Over Items1').item.json['Twitter Status'] }}",
+              "rightValue": "Posted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        3408
+      ],
+      "id": "21660bd3-55e7-4b8c-8984-4b4cbda7a3c9",
+      "name": "YouTube Post status3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "1F0rQECsz_f9che7V6dVx",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/1F0rQECsz_f9che7V6dVx",
+          "cachedResultName": "Twitter content generator"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1648,
+        3568
+      ],
+      "id": "c0a7b1b7-32b8-4ec8-8da5-28dd498b09df",
+      "name": "Call 'Twitter content generator'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e0fbe4d-f56d-44f9-824e-c1748302834c",
+              "name": "post_text",
+              "value": "={{ $('FineHome Social Media').item.json['Post Text'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        3568
+      ],
+      "id": "e176e757-bc60-4a9c-a01f-8cb4608dbb84",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "platform": "twitter",
+        "accountId": {
+          "__rl": true,
+          "value": "12424",
+          "mode": "list",
+          "cachedResultName": "fhreal_estate",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/12424"
+        },
+        "postContentText": "={{ JSON.parse($('Call \\'Twitter content generator\\'').item.json.output[0].content[0].text).final_text }}\n",
+        "postContentMediaUrls": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        3568
+      ],
+      "id": "13d8e796-9ff8-4d9c-bb62-1b32c8a97421",
+      "name": "Create X post",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appwJbGbxQnj2NKyp",
+          "mode": "list",
+          "cachedResultName": "FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "Twitter Status": "Posted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Facebook Status",
+              "displayName": "Facebook Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Instagram Status",
+              "displayName": "Instagram Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn Status",
+              "displayName": "LinkedIn Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "TikTok Status",
+              "displayName": "TikTok Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "YouTube Status",
+              "displayName": "YouTube Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Twitter Status",
+              "displayName": "Twitter Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Waiting",
+                  "value": "Waiting"
+                },
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2256,
+        3440
+      ],
+      "id": "a696e886-29f8-4d41-822c-6c10e86c145e",
+      "name": "Update X Status",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2026-03-13T01:05:09.010-04:00",
+          "Readable date": "March 13th 2026, 1:05:09 am",
+          "Readable time": "1:05:09 am",
+          "Day of week": "Friday",
+          "Year": "2026",
+          "Month": "March",
+          "Day of month": "13",
+          "Hour": "01",
+          "Minute": "05",
+          "Second": "09",
+          "Timezone": "America/New_York (UTC-04:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "FineHome Social Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Current Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Instagram post1": {
+      "main": [
+        [
+          {
+            "node": "Update Instagram Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Facebook post1": {
+      "main": [
+        [
+          {
+            "node": "Update Facebook Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weekday1": {
+      "main": [
+        [
+          {
+            "node": "Get DateOnly1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Get Weekday1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DateOnly1": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists5": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window5": {
+      "main": [
+        [
+          {
+            "node": "Facebook Status Post status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists6": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window6": {
+      "main": [
+        [
+          {
+            "node": "Instagram Post status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists7": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window7": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Post status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists8": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window8": {
+      "main": [
+        [
+          {
+            "node": "TikTok Post status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists9": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window9": {
+      "main": [
+        [
+          {
+            "node": "YouTube Post status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update YouTube Status1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Update TikTok Status1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Update LinkedIn Status1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Update Instagram Status1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update Facebook Status1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create LinkedIn post1": {
+      "main": [
+        [
+          {
+            "node": "Update LinkedIn Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create TikTok post1": {
+      "main": [
+        [
+          {
+            "node": "Update TikTok Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create YouTube Status post1": {
+      "main": [
+        [
+          {
+            "node": "Update YouTube Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload media": {
+      "main": [
+        [
+          {
+            "node": "Create Instagram post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload media1": {
+      "main": [
+        [
+          {
+            "node": "Create YouTube Status post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload media2": {
+      "main": [
+        [
+          {
+            "node": "Create TikTok post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists10": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window10": {
+      "main": [
+        [
+          {
+            "node": "TikTok Post status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists11": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window11": {
+      "main": [
+        [
+          {
+            "node": "Facebook Status Post status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists12": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window12": {
+      "main": [
+        [
+          {
+            "node": "Instagram Post status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists13": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window13": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Post status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists14": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window14": {
+      "main": [
+        [
+          {
+            "node": "YouTube Post status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload media2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update LinkedIn Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists13",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update Facebook Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists11",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Update Instagram Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists12",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Update TikTok Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists10",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Update YouTube Status1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists14",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Upload media1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Post status": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok Post status": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Post status1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok Post status1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Post status": {
+      "main": [
+        [
+          {
+            "node": "Create LinkedIn post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Post status1": {
+      "main": [
+        [
+          {
+            "node": "Create LinkedIn post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Post status": {
+      "main": [
+        [
+          {
+            "node": "Upload media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Post status1": {
+      "main": [
+        [
+          {
+            "node": "Upload media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Status Post status": {
+      "main": [
+        [
+          {
+            "node": "Create Facebook post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Status Post status1": {
+      "main": [
+        [
+          {
+            "node": "Create Facebook post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FineHome Social Media": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window": {
+      "main": [
+        [
+          {
+            "node": "YouTube Post status3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload media3": {
+      "main": [
+        [
+          {
+            "node": "Create X post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If FB Time Exists15": {
+      "main": [
+        [
+          {
+            "node": "If Within 5min Window15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Within 5min Window15": {
+      "main": [
+        [
+          {
+            "node": "YouTube Post status2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Update X Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If FB Time Exists15",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If FB Time Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Post status2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Post status3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Twitter content generator'": {
+      "main": [
+        [
+          {
+            "node": "Upload media3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Call 'Twitter content generator'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create X post": {
+      "main": [
+        [
+          {
+            "node": "Update X Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update X Status": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f5892d6a-2b72-4e34-9af8-94435df308cd",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "3p6Dy9GzM5S6WCbD3erlR",
+  "tags": [
+    {
+      "updatedAt": "2026-02-13T13:31:24.387Z",
+      "createdAt": "2026-02-13T13:31:24.387Z",
+      "id": "1FiD4UXlhDoePbCr",
+      "name": "Schedule"
+    },
+    {
+      "updatedAt": "2026-02-13T13:30:38.926Z",
+      "createdAt": "2026-02-13T13:30:38.926Z",
+      "id": "qdQNIuKgS1PkiGOX",
+      "name": "Publish"
+    },
+    {
+      "updatedAt": "2026-02-03T07:23:19.060Z",
+      "createdAt": "2026-02-03T07:23:19.060Z",
+      "id": "gwNM09lB2cZgdkEp",
+      "name": "FINEHOME"
+    }
+  ]
+}

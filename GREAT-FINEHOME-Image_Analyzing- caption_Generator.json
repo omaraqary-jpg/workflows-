@@ -1,0 +1,361 @@
+{
+  "name": "GREAT-FINEHOME-Image_Analyzing- caption_Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        624
+      ],
+      "id": "b488980d-ddd5-450f-b507-227931a917cf",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appePE5aw4Zl2Bmvy",
+          "mode": "list",
+          "cachedResultName": "Great FineHome Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appePE5aw4Zl2Bmvy"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appePE5aw4Zl2Bmvy/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post Image": "=https://drive.google.com/uc?export=download&id={{ $('Loop Over Items').item.json.id }}",
+            "Post Text": "={{ $json.output[0].content[0].text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Date Posted",
+              "displayName": "Date Posted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1280,
+        624
+      ],
+      "id": "a6a815aa-11c8-441a-8237-1e4ddff76715",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=FINAL PROMPT (CLEAN + COMPACT FORMAT)\nYou are a senior real estate digital marketing strategist with deep expertise in the UAE property market.\nYou will receive only an image.\n\nYour task is to analyze the image deeply and generate a high-quality, human-written real estate caption that delivers real value and is ready for direct publishing.\nANALYSIS RULES\nAnalyze the image for:\nProject type (investment / residential / mixed-use)\nTarget audience (investor / end-user / family / luxury buyer)\nMarket intent (ROI, lifestyle, stability, capital growth)\nDetect the most appropriate language automatically:\nIf the image contains Arabic text → write in Arabic.\nIf the image contains English text or no text → write in English.\nNever mention AI, automation, or analysis in the output.\nMANDATORY CAPTION STRUCTURE\nAlways follow this exact format:\n[HOOK – strong, decisive opening line]\n[Value-driven paragraph explaining the opportunity or insight behind the image]\n• [Key value]\n\n• [Long-term benefit]\n\n• [Market strength]\n\n• [Risk advantage]\n\n• [Lifestyle or ROI edge]\n[Clear, action-oriented Call To Action]\n#Hashtags in one single line\nWRITING GUIDELINES\nEach bullet point must be short, precise, and impactful (maximum 4–6 words).\nProfessional, confident, expert tone.\nNo emojis.\nNo clichés.\nNo exaggeration.\nNo questions.\nNo spelling or grammatical errors.\nSound fully human, written by a real digital marketing expert.\nMedium-length caption with strong perceived value.\nHASHTAG RULES\nHighly relevant to the image and project.\nReflect the UAE real estate market.\nNo generic or filler hashtags.\nOne clean line only.\nOUTPUT RULES\nOutput only the final caption.\nNo explanations.\nNo alternatives.\nNo formatting outside the structure above.\nReady for direct publishing without review.\n "
+            },
+            {
+              "type": "image",
+              "imageType": "base64"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "text",
+              "verbosity": "high"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        624
+      ],
+      "id": "f4386484-fc10-47de-acc0-0f00f21f1350",
+      "name": "Main",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        720,
+        624
+      ],
+      "id": "4676e894-abed-450e-be58-adda2da43fb2",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1XlLD1fH5AOidBG5mPoBAZ4tnffoIxcEi",
+            "mode": "list",
+            "cachedResultName": "Great-Fine Home",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1XlLD1fH5AOidBG5mPoBAZ4tnffoIxcEi"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        528,
+        624
+      ],
+      "id": "3be4d4ea-f8e0-421f-bdfb-12e3e0694d50",
+      "name": "Search files and folders1",
+      "executeOnce": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        512,
+        384
+      ],
+      "id": "25f62d7c-fea2-41b2-b830-6942a7ddc1c4",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "deletePermanently": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1280,
+        880
+      ],
+      "id": "f29d1ced-aa12-4075-844b-d070f1907f1b",
+      "name": "Delete a file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MSFY3H3n8kaoQCnF",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Main",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "fa84d420-f9f7-4693-b877-8a54f268d51c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "2qIxge1Oc6ZLvXvs",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T10:02:27.675Z",
+      "createdAt": "2026-02-04T10:02:27.675Z",
+      "id": "EIthAI2jJ7OyfTe3",
+      "name": "GREAT-FINEHOME"
+    }
+  ]
+}

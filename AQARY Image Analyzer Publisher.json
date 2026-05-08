@@ -1,0 +1,639 @@
+{
+  "name": "AQARY Image Analyzer Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1664,
+        464
+      ],
+      "id": "93153564-5e8d-4ec2-b904-fbcd9870f177",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appb4ExsXUpkmiFhZ",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appb4ExsXUpkmiFhZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "AQARY Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appb4ExsXUpkmiFhZ/tblVFLxBQAYs9038a"
+        },
+        "filterByFormula": "({Status} = '')",
+        "returnAll": false,
+        "options": {
+          "downloadFields": [
+            "Post Image"
+          ],
+          "fields": [
+            "Post Text",
+            "Post Image"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -1504,
+        464
+      ],
+      "id": "5b5f3163-1060-41d8-95f9-1a969b41063f",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "298864279967900",
+        "edge": "message",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "\"test\""
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -224
+      ],
+      "id": "5560f80d-8efa-41dd-9828-91224bc20eda",
+      "name": "Facebook Graph API",
+      "alwaysOutputData": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        752,
+        416
+      ],
+      "id": "dc12f7ca-695d-4534-a61d-ab38d6cd8817",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 AQARY PUBLISHING ENGINE v1.0\n\n**Objective:**\nAutomatically publish \"Approved\" content from Airtable to live social media channels.\n\n**Process Flow:**\n1. **Trigger:** Runs every 10-30 mins to check for approvals.\n2. **Fetch:** Pulls records with status **\"Approved\"**.\n3. **Route:** Switches logic based on the `Platform` field (LinkedIn, FB, etc.).\n4. **Publish:** Sends content to the respective API.\n5. **Update:** Marks Airtable record as **\"Posted\"** to prevent duplicates.\n\n**Safety:**\n- Only processes 1 item at a time (Loop).\n- Requires manual approval in Airtable before execution.\n",
+        "height": 1152,
+        "width": 576,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        0
+      ],
+      "id": "47098879-d632-4114-a130-47a85cccc11c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 📥 APPROVAL QUEUE\n\n**Logic:**\n- Filters Airtable for `{post status} = 'Approved'`.\n- **Note:** Only fetches records that are ready to go live.\n- **Optimization:** Downloads 'Image' field immediately to avoid re-fetching later.\n\n**Loop:**\n- Iterates through approved posts one by one.\n- Ensures stable API calls to social platforms.\n",
+        "height": 1152,
+        "width": 768,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1744,
+        0
+      ],
+      "id": "8e4788c9-5479-4fc9-97a8-195c18cf2db4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🔀 PLATFORM ROUTING\n\n**Switch Node:**\n- Reads the `Platform` field from Airtable.\n- **Routes:**\n  - **LinkedIn:** -> Create Post Node\n  - **Instagram:** -> Publish Node\n  - **Facebook:** -> Graph API Node\n  - **Twitter/X:** -> Tweet Node\n\n**Scalability:**\n- Easy to add new platforms (TikTok/Blog) by adding new Switch rules.\n",
+        "height": 1152,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        0
+      ],
+      "id": "a219942a-45a1-401d-9b44-3485c7153db3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 📡 LIVE PUBLISHING\n\n**Nodes:**\n- **LinkedIn:** Posts text + image as a \"Share\".\n- **Instagram/FB:** Uses Graph API for media publishing.\n- **HTTP Requests:** Custom API calls for other platforms.\n\n**Critical Config:**\n- Ensure OAuth2 credentials are active.\n- Images must be valid public URLs (from Airtable).\n\n",
+        "height": 1152,
+        "width": 896,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "e905206c-a457-4eba-bcb5-e6e867c86628",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## ✅ COMPLETION MARKER\n\n**Action:**\n- Updates the original Airtable record.\n- **Status Change:** 'Approved' -> **'Posted'**.\n- **Timestamp:** Adds `Scheduled Date` = Today.\n\n**Importance:**\n- Removes the item from the \"Approved\" queue.\n- Prevents double-posting in the next schedule run.\n",
+        "height": 1152,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        0
+      ],
+      "id": "d65e9ae3-8b98-4f82-b23b-ea6b6c887828",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -832,
+        464
+      ],
+      "id": "cbe6a527-ade5-42b5-8fcb-c244af62ddde",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appb4ExsXUpkmiFhZ",
+          "mode": "list",
+          "cachedResultName": "AQARY Social Media Posts",
+          "cachedResultUrl": "https://airtable.com/appb4ExsXUpkmiFhZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVFLxBQAYs9038a",
+          "mode": "list",
+          "cachedResultName": "Image Analyzer",
+          "cachedResultUrl": "https://airtable.com/appwJbGbxQnj2NKyp/tblVFLxBQAYs9038a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search records').item.json.id }}",
+            "Status": "Posted",
+            "Date Posted": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Post Image",
+              "displayName": "Post Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Posted",
+              "displayName": "Date Posted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        480
+      ],
+      "id": "abefdf31-f1a9-4917-9dcf-2a8e31b642b2",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "platform": "facebook",
+        "accountId": {
+          "__rl": true,
+          "value": "19555",
+          "mode": "list",
+          "cachedResultName": "Ashraf Erian",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/19555"
+        },
+        "postContentText": "={{ $json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json['Post Image'][0].url }}",
+        "facebookPageId": {
+          "__rl": true,
+          "value": "269365756260181",
+          "mode": "list",
+          "cachedResultName": "Aqary Real Estate Investment & Development",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/19555/subaccounts/269365756260181"
+        },
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        192,
+        304
+      ],
+      "id": "fe7aa2ae-378f-46eb-93f4-76b0644a14ef",
+      "name": "Create Facebook post",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "accountId": {
+          "__rl": true,
+          "value": "30677",
+          "mode": "list",
+          "cachedResultName": "aqary_realestate",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/30677"
+        },
+        "postContentText": "={{ $json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json['Post Image'][0].url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        192,
+        96
+      ],
+      "id": "5f9f2984-8019-4b2d-9593-234eb71b1f0b",
+      "name": "Create Instagram post",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "platform": "tiktok",
+        "accountId": {
+          "__rl": true,
+          "value": "29108",
+          "mode": "list",
+          "cachedResultName": "aqaryinv",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/29108"
+        },
+        "postContentText": "={{ $json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json['Post Image'][0].url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        192,
+        976
+      ],
+      "id": "3f2fd691-3e0c-4f90-9fbc-f0da59713521",
+      "name": "Create TikTok post",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "72475c73-bdc3-4d4e-aa18-67278b760a58"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -336,
+        480
+      ],
+      "id": "4f73e76e-477d-4796-9a63-065cea112d17",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "platform": "youtube",
+        "accountId": {
+          "__rl": true,
+          "value": "26953",
+          "mode": "list",
+          "cachedResultName": "AID Aqary Investment (Aqary Investment)",
+          "cachedResultUrl": "https://backend.blotato.com/v2/accounts/26953"
+        },
+        "postContentText": "={{ $json['Post Text'] }}",
+        "postContentMediaUrls": "={{ $json['Post Image'][0].url }}",
+        "options": {}
+      },
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        208,
+        496
+      ],
+      "id": "13e4c6e2-dc4b-4cf3-b423-cc748b266b05",
+      "name": "Create YouTube post",
+      "credentials": {
+        "blotatoApi": {
+          "id": "ZfsFDRE76Tr3g0ka",
+          "name": "Blotato account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Create Instagram post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Facebook post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create TikTok post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create YouTube post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Instagram post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Facebook post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create TikTok post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Create YouTube post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "wASx36bdFTlubpGhe8lV6"
+  },
+  "versionId": "37761eae-3dee-4937-9efd-519b862b83a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "TRgJLINFM5e5oq4S",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    }
+  ]
+}

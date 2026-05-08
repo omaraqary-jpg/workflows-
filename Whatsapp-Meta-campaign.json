@@ -1,0 +1,1706 @@
+{
+  "name": "Whatsapp-Meta-campaign",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "c93fd692-f42b-4665-8f15-87961e3392c4",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "responses": {
+          "values": [
+            {},
+            {
+              "role": "system"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "1d04912d-50a5-4d92-9fe0-1e1dea08ab22",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/messages/template",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -592,
+        320
+      ],
+      "id": "1014d479-6846-4619-8024-a0065c86180e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts/{id}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -400,
+        736
+      ],
+      "id": "89621382-49b4-48aa-a022-277d7c358357",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts/bfa30b73-130c-426c-99f5-e8bb09c6b9c0/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -256,
+        448
+      ],
+      "id": "bdc978a3-429f-4503-a330-5dd03fdb3124",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "path": "7f97c936-56a7-4d1a-ba1a-5dab68242a3a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        688
+      ],
+      "id": "87de7cdf-36f3-4e76-ae7a-18d3436e8676",
+      "name": "Webhook",
+      "webhookId": "7f97c936-56a7-4d1a-ba1a-5dab68242a3a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=## LANGUAGE RULE — HIGHEST PRIORITY\nDetect the language of the user's FIRST message and respond ENTIRELY in that language throughout the whole conversation. Never mix languages. Never switch languages unless the user does first.\n- User writes in English → respond 100% in English\n- User writes in Arabic → respond 100% in Arabic\n\n---\n\nYou are Layla, a friendly sales specialist at Fine Home — a leading real estate brokerage. Your goal is to get property owners to list and sell their units through Fine Home's exclusive investor network.\n\n---\n\n## OPENING MESSAGE\nWhen a new conversation starts, greet based on detected language:\n\n**If English:**\n\"Hello! 👋 I'm Layla from Fine Home.\nWe help property owners sell their units fast through our network of thousands of active investors.\nWould you like to list your property for FREE?\n✅ Yes, I'm interested\n❌ No, thanks\"\n\n**If Arabic:**\n\"مرحبًا! 👋 أنا ليلى من فريق Fine Home.\nنساعد أصحاب العقارات على بيع وحداتهم بسرعة عبر شبكتنا التي تضم آلاف المستثمرين.\nهل تودّ إضافة عقارك مجانًا؟\n✅ نعم، أنا مهتم\n❌ لا، شكراً\"\n\n---\n\n## CONVERSATION FLOW\n\n### If YES (interested):\nCollect these details one at a time:\n1. Property type (apartment / villa / townhouse)\n2. Location / community\n3. Number of bedrooms\n4. Asking price (or offer free valuation)\n5. Is it rented or vacant?\n6. Best contact method (WhatsApp / call / email)\n\nAfter collecting: \"Thank you! One of our specialists will contact you within 24 hours. 🏠\"\n\n### If NO (not interested):\n\"No problem! Would you like us to send you the latest available projects and investment opportunities?\"\nIf still no: \"Thank you for your time! Feel free to reach out anytime 😊\"\n\n---\n\n## RULES\n- NEVER make up prices, project names, or guarantees\n- NEVER ask more than 2 questions per message\n- Keep messages SHORT — max 4 lines\n- Always end with a clear question or CTA\n- If user is silent: \"Still there? Happy to help! 😊\" (or Arabic equivalent)\n- If unsure of an answer: \"Let me connect you with one of our specialists for that.\"\n\n## DATA COLLECTION ORDER\nCollect in this exact order, one at a time:\n1. Full name → \"What's your name?\"\n2. WhatsApp number → \"What's your WhatsApp number?\"\n3. Property type (apartment / villa / townhouse / land)\n4. Location / community\n5. Number of bedrooms\n6. Asking price → offer options: <1M / 1M-3M / >3M / Not sure\n7. Is it rented or vacant?\n\n## SAVING DATA — MANDATORY\nAfter collecting ALL 7 fields, you MUST:\n1. Call create_airtable_record immediately with:\n   - full_name, phone_number, type_of_property,\n     property_address, estimated_property_value,\n     additional_notes (rented/vacant + bedrooms),\n     lead_source = \"Landing Page AI Chatbot\",\n     session_id\n2. ONLY THEN send the thank you message\n3. NEVER end the conversation without calling this tool\n",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        304
+      ],
+      "id": "d786081a-f666-4132-84f3-0ee55e4ca3a8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        160,
+        368
+      ],
+      "id": "ba9431c7-d026-466f-92ec-92e2b90f2528",
+      "name": "When chat message received",
+      "webhookId": "b9e6ddfe-2b9c-42c7-951e-40cb54df8f46"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        528
+      ],
+      "id": "1597a63f-82b6-4021-8bb9-3de3137bdf3d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        528
+      ],
+      "id": "9694a794-ae6f-4b06-a200-61a90207945a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "composite",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        272
+      ],
+      "id": "366e0c2e-6aee-4b11-afca-f136f86665f8",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Real_Estate_Project1/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "300"
+            },
+            {
+              "name": "filters",
+              "value": "[{\"field\":\"name\", \"operator\":\"equals\", \"value\":\"Diva\"}]"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer crm_e329ada75e53c51e047e71434fa6007b_d65506b2a0d74a24d89d32aa1c37ddd79984a3c1e8b9214ac6e857fb6cde6518"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        336,
+        1648
+      ],
+      "id": "e82809fa-5b1a-4c27-8e90-b8749206b084",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "url": "=https://crm-api.aqaryone.com/api/v2/records/{{ $json.id }}/images",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer crm_e329ada75e53c51e047e71434fa6007b_d65506b2a0d74a24d89d32aa1c37ddd79984a3c1e8b9214ac6e857fb6cde6518"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1376,
+        1408
+      ],
+      "id": "4b601d1a-ab91-490d-89c4-b38589bd79e8",
+      "name": "Get Project Images"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        640,
+        1344
+      ],
+      "id": "b88a2858-83a9-46f5-8762-8106e1f4835f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "60cd66f0-dfec-4465-b68e-8f1c9fa7e27e",
+              "leftValue": "={{ $('HTTP Request3').item.json.pagination.has_more }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        1264
+      ],
+      "id": "b7baa409-6e6f-42c3-a9ab-6d30ae057b30",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        1168
+      ],
+      "id": "7e5f4e03-df30-4cdf-9105-9c74309a5774",
+      "name": "Loop Over Items",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Real_Estate_Project1/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "200"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer crm_e329ada75e53c51e047e71434fa6007b_d65506b2a0d74a24d89d32aa1c37ddd79984a3c1e8b9214ac6e857fb6cde6518"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        1184
+      ],
+      "id": "0dd3769d-2ad0-49e4-9787-05993d2ad6cb",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        816,
+        1488
+      ],
+      "id": "f04cb374-5a15-41de-ae25-196b64446b56",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1bhXtj1OJOj1otrNdt6xtOFZOQ2DG3IqmmAfo39vax8I",
+          "mode": "list",
+          "cachedResultName": "profile_projects",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bhXtj1OJOj1otrNdt6xtOFZOQ2DG3IqmmAfo39vax8I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 207318133,
+          "mode": "list",
+          "cachedResultName": "profile_projects(Sheet1)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bhXtj1OJOj1otrNdt6xtOFZOQ2DG3IqmmAfo39vax8I/edit#gid=207318133"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "project_name": "={{ $json.data.name }}",
+            "status": "={{ $json.data.Status }}",
+            "lifestyle": "={{ $json.data.Life_Style }}",
+            "proj_addr__location_url": "={{ $json.data.Project_URL }}",
+            "proj_addr__sub_community": "={{ $json.data.Sub_Community.name }}",
+            "proj_addr__city": "={{ $json.data.City.name }}",
+            "proj_addr__state": "={{ $json.data.State_1.name }}",
+            "proj_addr__country": "={{ $json.data.Country.name }}",
+            "proj_addr__community": "={{ $json.data.Community.name }}",
+            "ownership": "={{ $json.data.Owner_Ship }}",
+            "min_area": "={{ $json.data.Min_Area }}",
+            "max_area": "={{ $json.data.Max_Area }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bank_name",
+              "displayName": "bank_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name_ar",
+              "displayName": "project_name_ar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "management_companies_cn",
+              "displayName": "management_companies_cn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "developer_companies_cn",
+              "displayName": "developer_companies_cn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_type",
+              "displayName": "company_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url_360",
+              "displayName": "url_360",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "map_360_url",
+              "displayName": "map_360_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_verified",
+              "displayName": "is_verified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_local",
+              "displayName": "is_local",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description_arabic",
+              "displayName": "description_arabic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_multiphase",
+              "displayName": "is_multiphase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_no",
+              "displayName": "project_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "license_no",
+              "displayName": "license_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "escrow_no",
+              "displayName": "escrow_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "registration_date",
+              "displayName": "registration_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "unit_types",
+              "displayName": "unit_types",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "addresses",
+              "displayName": "addresses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "plan",
+              "displayName": "plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "properties",
+              "displayName": "properties",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "@last_update",
+              "displayName": "@last_update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "photos",
+              "displayName": "photos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "furnished",
+              "displayName": "furnished",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ownership",
+              "displayName": "ownership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "plot_area",
+              "displayName": "plot_area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "life_style",
+              "displayName": "life_style",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "max_bedrooms",
+              "displayName": "max_bedrooms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "min_bedrooms",
+              "displayName": "min_bedrooms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "min_area",
+              "displayName": "min_area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "max_area",
+              "displayName": "max_area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "no_of_units",
+              "displayName": "no_of_units",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "starting_price",
+              "displayName": "starting_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completion_date",
+              "displayName": "completion_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completion_status",
+              "displayName": "completion_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completion_percentage",
+              "displayName": "completion_percentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completion_percentage_date",
+              "displayName": "completion_percentage_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service_charge",
+              "displayName": "service_charge",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "facilities",
+              "displayName": "facilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amenities",
+              "displayName": "amenities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proj_addr__country",
+              "displayName": "proj_addr__country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proj_addr__state",
+              "displayName": "proj_addr__state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proj_addr__city",
+              "displayName": "proj_addr__city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proj_addr__community",
+              "displayName": "proj_addr__community",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proj_addr__sub_community",
+              "displayName": "proj_addr__sub_community",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proj_addr__location_url",
+              "displayName": "proj_addr__location_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lifestyle",
+              "displayName": "lifestyle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        1664
+      ],
+      "id": "6293fc19-4360-466e-8eec-b1a368298cdd",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.aqaryservices.com/webhook/a1cc9d96-862d-4144-9c43-d6c7623a090f",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Hello World"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -80,
+        912
+      ],
+      "id": "c7f28a9b-f1a9-4222-a6c7-660a4bb796aa",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app5VYjjfuzIj30YZ",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/app5VYjjfuzIj30YZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblS74G1bk55sfW4a",
+          "mode": "list",
+          "cachedResultName": "Client",
+          "cachedResultUrl": "https://airtable.com/app5VYjjfuzIj30YZ/tblS74G1bk55sfW4a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Estimated Property Value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Estimated_Property_Value', ``, 'number') }}",
+            "Full Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Full_Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Phone Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone_Number', ``, 'string') }}",
+            "Property Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Property_Address', ``, 'string') }}",
+            "Reason for Selling": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reason_for_Selling', ``, 'string') }}",
+            "Additional Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Additional_Notes', ``, 'string') }}",
+            "Associated Landing Page": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Associated_Landing_Page', ``, 'json') }}",
+            "Session ID": "={{ $json.sessionId }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Address",
+              "displayName": "Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Contact Method",
+              "displayName": "Preferred Contact Method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Phone",
+                  "value": "Phone"
+                },
+                {
+                  "name": "Email",
+                  "value": "Email"
+                },
+                {
+                  "name": "Text",
+                  "value": "Text"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Type of Property",
+              "displayName": "Type of Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Residential",
+                  "value": "Residential"
+                },
+                {
+                  "name": "Commercial",
+                  "value": "Commercial"
+                },
+                {
+                  "name": "Land",
+                  "value": "Land"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estimated Property Value",
+              "displayName": "Estimated Property Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason for Selling",
+              "displayName": "Reason for Selling",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Notes",
+              "displayName": "Additional Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Lead Source",
+              "displayName": "Lead Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Landing Page AI Chatbot",
+                  "value": "Landing Page AI Chatbot"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Submitted",
+              "displayName": "Date Submitted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Associated Landing Page",
+              "displayName": "Associated Landing Page",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        528
+      ],
+      "id": "ef6b61e9-3a95-43a7-839e-88ae7883cf4c",
+      "name": "Create a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=# Role & Identity\nYou are a professional AI assistant for *Fine Home International*, a real estate company that helps property owners market their properties to thousands of investors across our network.\n\nYour name is **Fine Home Assistant**.\nYou communicate in **Arabic** by default, unless the user writes in English.\nAlways be polite, professional, and concise.\n\n---\n\n# Your Goals\n1. Greet the user and introduce Fine Home's services.\n2. Offer two main paths:\n   - **Path A**: List their property for free.\n   - **Path B**: Browse available projects.\n3. Collect the required information based on the chosen path.\n4. Save the collected data using the available tool.\n5. End the conversation with a confirmation message.\n\n---\n\n# Conversation Flow\n\n## Step 1 — Opening Message\nSend this exact message when the conversation starts:\n\n\"\"\"\nمرحبًا 👋\n\nنحن من فريق *Fine Home* 🏡\nنساعد الملاك على تسويق عقاراتهم داخل شبكتنا التي تضم آلاف المستثمرين.\n\nهل تود أن نضيف عقارك مجانًا ونرسل لك أحدث المشاريع المتاحة لدينا؟\n\n1️⃣ نعم، مهتم\n2️⃣ لا، شكرًا\n\"\"\"\n\n- If user says **No** → Reply: \"شكرًا لتواصلك معنا، يسعدنا خدمتك في أي وقت! 😊\" and end.\n- If user says **Yes** → Proceed to Step 2.\n\n---\n\n## Step 2 — Choose Path\n\nAsk:\n\"\"\"\nممتاز! 🎉 تحب تبدأ بـ:\n\n1️⃣ 🏠 إدراج عقاري\n2️⃣ 🔍 مشاهدة المشاريع\n\"\"\"\n\n---\n\n## Path A — List Your Property\n\nCollect the following information **one question at a time**:\n\n**Q1 — Property Type:**\n\"\"\"\nما نوع العقار الذي تمتلكه؟\n\n1️⃣ 🏡 فيلا\n2️⃣ 🏢 شقة\n3️⃣ 🌍 أرض\n4️⃣ 🏗️ مبنى كامل\n\"\"\"\n\n**Q2 — City:**\n\"\"\"\nفي أي مدينة يقع العقار؟\n\n1️⃣ دبي\n2️⃣ أبوظبي\n3️⃣ الشارقة\n4️⃣ أخرى (اذكر المدينة)\n\"\"\"\n\n**Q3 — Expected Price:**\n\"\"\"\nما السعر المتوقع للبيع؟\n\n1️⃣ 💰 أقل من 1M\n2️⃣ 💰💰 1M – 3M\n3️⃣ 💎 أكثر من 3M\n4️⃣ ❓ غير محدد\n\"\"\"\n\nAfter collecting all 3 answers → **call the save tool** with:\n- full_name (from user context if available)\n- phone_number (from user context if available)\n- type_of_property\n- property_address (city)\n- estimated_property_value\n- lead_source = \"Landing Page AI Chatbot\"\n- session_id\n\nThen send:\n\"\"\"\nشكرًا! 🙏\n✅ تم استلام بيانات عقارك بنجاح.\nسيتواصل معك فريقنا المختص قريبًا لمساعدتك في إتمام الإدراج. 🏡\n\"\"\"\n\n---\n\n## Path B — Browse Projects\n\nSend a featured project (image or description) and ask:\n\"\"\"\n🏗️ هذا أحد مشاريعنا المتاحة حاليًا!\n\n[اسم المشروع] — [الموقع]\n📐 المساحة: [X] قدم مربع\n💰 السعر يبدأ من: [X] AED\n\nتحب تعرف التفاصيل؟\n\n1️⃣ 📋 نعم، أرسل التفاصيل\n2️⃣ 🔄 أرسل خيارًا آخر\n\"\"\"\n\n- If **\"Send Another\"** → show a different project and repeat.\n- If **\"Yes, Send Details\"** → proceed to qualify the lead:\n\n**Q1 — Purpose:**\n\"\"\"\nهل تبحث عن:\n\n1️⃣ 📈 استثمار\n2️⃣ 🏠 سكن\n\"\"\"\n\n**Q2 — Budget:**\n\"\"\"\nما هي ميزانيتك التقريبية؟\n\n1️⃣ 💰 أقل من 1M\n2️⃣ 💰💰 1M – 3M\n3️⃣ 💎 أكثر من 3M\n\"\"\"\n\n**Q3 — Timeline:**\n\"\"\"\nمتى تنوي الشراء؟\n\n1️⃣ ⚡ خلال شهر\n2️⃣ 📅 1–3 أشهر\n3️⃣ 🕐 لاحقًا\n\"\"\"\n\nAfter collecting all 3 answers → **call the save tool** with:\n- full_name (from user context if available)\n- phone_number (from user context if available)\n- additional_notes = purpose + budget + timeline\n- lead_source = \"Landing Page AI Chatbot\"\n- session_id\n\nThen send:\n\"\"\"\nشكرًا! 🙏\n✅ تم استلام بياناتك بنجاح.\nسيتواصل معك فريقنا المختص قريبًا لعرض أفضل الخيارات المناسبة لك. 🏡\n\"\"\"\n\n---\n\n# Rules & Constraints\n\n- **Always ask one question at a time.** Never ask multiple questions in the same message.\n- **Never skip a question.** Collect all required fields before saving.\n- **Never make up project data.** Only use project information provided to you via tools or context.\n- **Always use the save tool** after completing a path — never just acknowledge without saving.\n- **Language**: Respond in Arabic unless the user initiates in English.\n- **Tone**: Warm, professional, and concise. No long paragraphs.\n- **Do not break character.** You are Fine Home Assistant, not a general AI.\n- If the user asks something unrelated to real estate or Fine Home services, politely redirect:\n  \"أنا هنا فقط لمساعدتك في خدمات Fine Home العقارية 😊\"\n\n---\n\n# Available Tools\n\n| Tool | When to Use |\n|---|---|\n| `create_airtable_record` | After completing Path A or Path B to save lead data |\n\n# Data to Always Capture (if available from context)\n- `full_name`\n- `phone_number`\n- `session_id`\n- `lead_source` = \"Landing Page AI Chatbot\" (always hardcoded)\n",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        528,
+        784
+      ],
+      "id": "6f42a303-d9e1-4bfc-9e3d-5f09dce85963",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        1008
+      ],
+      "id": "6c52565e-90bf-4f5a-b640-b5728af7f816",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        1008
+      ],
+      "id": "d31a4546-6785-44b9-82ad-d212695ca1cd",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app5VYjjfuzIj30YZ",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/app5VYjjfuzIj30YZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblS74G1bk55sfW4a",
+          "mode": "list",
+          "cachedResultName": "Client",
+          "cachedResultUrl": "https://airtable.com/app5VYjjfuzIj30YZ/tblS74G1bk55sfW4a"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Estimated Property Value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Estimated_Property_Value', ``, 'number') }}",
+            "Session ID": "={{ $json.sessionId }}",
+            "Associated Landing Page": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Associated_Landing_Page', ``, 'json') }}",
+            "Additional Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Additional_Notes', ``, 'string') }}",
+            "Reason for Selling": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reason_for_Selling', ``, 'string') }}",
+            "Full Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Full_Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Phone Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone_Number', ``, 'string') }}",
+            "Property Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Property_Address', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Address",
+              "displayName": "Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Contact Method",
+              "displayName": "Preferred Contact Method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Phone",
+                  "value": "Phone"
+                },
+                {
+                  "name": "Email",
+                  "value": "Email"
+                },
+                {
+                  "name": "Text",
+                  "value": "Text"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Type of Property",
+              "displayName": "Type of Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Residential",
+                  "value": "Residential"
+                },
+                {
+                  "name": "Commercial",
+                  "value": "Commercial"
+                },
+                {
+                  "name": "Land",
+                  "value": "Land"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estimated Property Value",
+              "displayName": "Estimated Property Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason for Selling",
+              "displayName": "Reason for Selling",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Notes",
+              "displayName": "Additional Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Lead Source",
+              "displayName": "Lead Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Landing Page AI Chatbot",
+                  "value": "Landing Page AI Chatbot"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Submitted",
+              "displayName": "Date Submitted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Associated Landing Page",
+              "displayName": "Associated Landing Page",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        1008
+      ],
+      "id": "12f42386-97a7-4476-88c8-bc41f450dfcd",
+      "name": "Create a record in Airtable1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When chat message received": [
+      {
+        "json": {
+          "chatInput": "hi",
+          "sessionId": "session_1772860919302_7g2recyx0"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        []
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record in Airtable1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "55e98ef4-107f-47f0-a729-80af7836e64c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "noVyz4cage0p-41BgkI_4",
+  "tags": []
+}
