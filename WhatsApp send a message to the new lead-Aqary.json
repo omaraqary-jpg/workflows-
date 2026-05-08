@@ -1,0 +1,557 @@
+{
+  "name": "WhatsApp send a message to the new lead-Aqary",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fff2d6c3-b467-420b-a406-5d9a37a28129",
+              "leftValue": "={{ $json.body.routing_key }}",
+              "rightValue": "lead.created",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "70919c2d-2a4b-4f84-8bef-43fd986552b6",
+              "leftValue": "={{ $json.body.event_data.event_data.updated_data.Lead_Source }}",
+              "rightValue": "Bayut",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "784edf13-6918-40ae-8b96-94f8422fc22f",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -112,
+        0
+      ],
+      "id": "49e914e0-7bc9-4906-a4d8-5db3b7d2cf6b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0511966c-cb96-4ea4-8354-c96b1a9cb996",
+              "name": "body.event_data.event_data.updated_data.First_Name",
+              "value": "={{ $('New lead received').item.json.body.event_data.event_data.updated_data.First_Name }} {{ $json.body.event_data.event_data.updated_data.Last_Name }}",
+              "type": "string"
+            },
+            {
+              "id": "848db599-e554-4cfe-87e5-13ca6367a136",
+              "name": "Lead_Number",
+              "value": "={{ $('New lead received').item.json.body.event_data.event_data.updated_data.Modified_By.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "a2e6de6c-f113-4253-bf41-2e3a5e32a057",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"phone_number\":\"{{ $json.Lead_Number }}\",\"name\":\"{{ $json.body.event_data.event_data.updated_data.First_Name }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        880,
+        -160
+      ],
+      "id": "3d01a59d-7d8f-4ace-9c83-3241c7261132",
+      "name": "Creat ChatIQ Contact"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatiq.aqaryservices.com/api/messages/template",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contact_id\": \"077948da-85c4-4e5c-831c-5852b5242a76\",\n  \"template_name\": \"crm_new_lead___whatsapp_message_aqary_investment\",\n  \"template_params\": {\n    \"1\": \"{{ $('Creat ChatIQ Contact').item.json.data.name }}\",\n    \"2\": \"{{ $('New lead received').item.json.body.event_data.event_data.updated_data.Portal_URL }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1120,
+        -160
+      ],
+      "id": "2dabf29e-387e-4ae2-a7a5-2f74572933db",
+      "name": "Send ChatIQ Message",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "BvucqxQxW1Fwmx1F",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.company_id }}",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "59c8e44f-3974-4c2d-b387-45884fcc3144"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Aqary Investment"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7fb0ea16-88f3-43e4-891d-eb573b7fa023",
+                    "leftValue": "={{ $json.body.company_id }}",
+                    "rightValue": "3",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FineHome"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "8da4c107-b453-4c1f-ac12-8b1e22cfe3cb",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0511966c-cb96-4ea4-8354-c96b1a9cb996",
+              "name": "body.event_data.event_data.updated_data.First_Name",
+              "value": "={{ $('New lead received').item.json.body.event_data.event_data.updated_data.First_Name }} {{ $json.body.event_data.event_data.updated_data.Last_Name }}",
+              "type": "string"
+            },
+            {
+              "id": "848db599-e554-4cfe-87e5-13ca6367a136",
+              "name": "Lead_Number",
+              "value": "={{ $('New lead received').item.json.body.event_data.event_data.updated_data.Modified_By.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        192
+      ],
+      "id": "2cf486ab-46ab-47f6-b62f-cead06deb607",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"phone_number\":\"{{ $json.Lead_Number }}\",\"name\":\"{{ $json.body.event_data.event_data.updated_data.First_Name }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        880,
+        192
+      ],
+      "id": "8e459394-93ac-4634-802c-badb2fec33a4",
+      "name": "Creat ChatIQ Contact1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatiq.aqaryservices.com/api/messages/template",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contact_id\": \"{{ $('Creat ChatIQ Contact1').item.json.data.id }}\",\n  \"template_name\": \"crm\",\n  \"template_params\": {\n    \"1\": \"{{ $('Creat ChatIQ Contact1').item.json.data.name }}\",\n    \"2\": \"AP0005\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1120,
+        192
+      ],
+      "id": "174e3bde-e0e2-42a3-821e-444c54c1ba35",
+      "name": "Send ChatIQ Message1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "BvucqxQxW1Fwmx1F",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## FINEHOME",
+        "height": 272,
+        "width": 928,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        64
+      ],
+      "id": "53f9bb73-2ae1-4bcf-95be-1a20cdf8d127",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## AQARY INVESTMENT\n",
+        "height": 272,
+        "width": 928,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -272
+      ],
+      "id": "c2f8bea1-2b10-447d-9552-21c24875a480",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatiq.aqaryservices.com/api/messages/template",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contact_id\": \"{{ $('Creat ChatIQ Contact2').item.json.data.id }}\",\n  \"template_name\": \"finehome_sell_your_property_ar\",\n  \"template_language\": \"ar\",\n  \"components\": [\n    {\n      \"type\": \"body\",\n      \"parameters\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"{{ $('Creat ChatIQ Contact2').item.json.data.name }}\"\n        }\n      ]\n    },\n    {\n      \"type\": \"carousel\",\n      \"cards\": [\n        {\n          \"card_index\": 0,\n          \"components\": [\n            {\n              \"type\": \"header\",\n              \"parameters\": [\n                {\n                  \"type\": \"image\",\n                  \"image\": {\n                    \"link\": \"https://v5.airtableusercontent.com/v3/u/52/52/1775829600000/KN0JbI4ezaf3euB9cCCEUQ/tI1qKa7PrQlm3wKh2xdBPHF4CAtCfFVu3_pGDr8YyrheX4GeNUc0GAixl0-2vcdW_DwmFQNWN6rAJHmG4Jv8sX9gfKfbiF3R1Htw152ABfIA04tvi42bAaDo40nxv9kDIJBsmWndzGb2BOimmOTeWQ/96by3iSdMbSXuv31azzX0Z36Ibg46Cvl2ZPWvxdxeG0\"\n                  }\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"card_index\": 1,\n          \"components\": [\n            {\n              \"type\": \"header\",\n              \"parameters\": [\n                {\n                  \"type\": \"image\",\n                  \"image\": {\n                    \"link\": \"https://v5.airtableusercontent.com/v3/u/52/52/1775829600000/fDU21jmAi4nBHvKyV6O0zw/UAPQuA14FKiNFZGtr2_UWkLbGMgf6B7Xq_seRkBzZOKrEt1unxiNUwy4upnDtB71ziThfIpBdl02SVno6kW4-ZYK7h28tY2UaNgNGNYDv7bjq4rrOIWnqbDtHHffesXp2ISHOp4iVNu86luZx9NYPQ/xgCyFnZel7LjzWa8NQCjn8ZMnvbEERVC0mqUFTy7vrw\"\n                  }\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"card_index\": 2,\n          \"components\": [\n            {\n              \"type\": \"header\",\n              \"parameters\": [\n                {\n                  \"type\": \"image\",\n                  \"image\": {\n                    \"link\": \"https://v5.airtableusercontent.com/v3/u/52/52/1775829600000/PJrdsnAASLX0x1NIVvg59w/xDparWz6TR7uPdzB0D0WywxYDV5xV5SWFPCsF2u822NExhzajMbF9jWGxiHLqZxUbPSyN3aZzJW43rbS8kQhsgQG9tlxQ6FKbS_m3iCozT9M3kgIbQnioOYK1fi9yS2v2yHdI5H0PUNK1n1TL9-wtw/y1tYHgQfl8wdOFuC4kYR2_XHkkRSm5--BSfiFZxca9M\"\n                  }\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2992,
+        224
+      ],
+      "id": "6d653fcc-3073-4375-b12b-05f999e58e39",
+      "name": "Send ChatIQ Message2",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "BvucqxQxW1Fwmx1F",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"phone_number\":\"+971543551670\",\"name\":\"Omar\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2752,
+        224
+      ],
+      "id": "3ede6d39-25f8-4425-9c78-0b3d8ef46ab0",
+      "name": "Creat ChatIQ Contact2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"phone_number\":\"+971505395183\",\"name\":\"Aqary_HR\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2736,
+        560
+      ],
+      "id": "6cfaf9c7-62b6-4682-a703-50b32972fecb",
+      "name": "Creat ChatIQ Contact3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead-received",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        0
+      ],
+      "id": "46e4fc3d-1388-4f3f-8e03-88565718725e",
+      "name": "New lead received",
+      "webhookId": "38a16e51-9f75-494d-b08d-07f09e9774cb"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Creat ChatIQ Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creat ChatIQ Contact": {
+      "main": [
+        [
+          {
+            "node": "Send ChatIQ Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Creat ChatIQ Contact1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creat ChatIQ Contact1": {
+      "main": [
+        [
+          {
+            "node": "Send ChatIQ Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creat ChatIQ Contact2": {
+      "main": [
+        [
+          {
+            "node": "Send ChatIQ Message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New lead received": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "68beef27-7719-41d6-9a34-c28b0bafa5d8",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "OyzpTRIc8kliGIUdbdkoU",
+  "tags": [
+    {
+      "updatedAt": "2026-04-09T12:45:50.085Z",
+      "createdAt": "2026-04-09T12:45:50.085Z",
+      "id": "qSR2ZyxWw6Fydzoz",
+      "name": "WhatsAPP"
+    }
+  ]
+}

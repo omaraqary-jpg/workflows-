@@ -1,0 +1,491 @@
+{
+  "name": "Social Media Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "97b274bd-d5d1-4eb4-b5ef-16b0a1bddf53",
+              "name": "page_id",
+              "value": "={{ $json.body.entry[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "b27236fa-c34a-4287-b0b5-a0a34b94f6b8",
+              "name": "user_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a3a84cc7-fcb8-4a53-aaef-31de24f02921",
+              "name": "user_name",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.name }}",
+              "type": "string"
+            },
+            {
+              "id": "d237db53-82b9-415a-927c-ef924d9d15a4",
+              "name": "post_link",
+              "value": "={{ $json.body.entry[0].changes[0].value.post.permalink_url }}",
+              "type": "string"
+            },
+            {
+              "id": "ad207627-b154-4b64-b7dc-f844bdbdb991",
+              "name": " promotion_status",
+              "value": "={{ $json.body.entry[0].changes[0].value.post.promotion_status }}",
+              "type": "string"
+            },
+            {
+              "id": "d396918a-6b3d-4741-8dcc-ff45475d9e8b",
+              "name": "post_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.post.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c8bed32e-32ab-4184-aadf-fc48e23fd595",
+              "name": " comment_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.comment_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3ca54d40-2cda-4784-9865-e06b8ae499c5",
+              "name": "user_comment",
+              "value": "={{ $json.body.entry[0].changes[0].value.message }}",
+              "type": "string"
+            },
+            {
+              "id": "ed8d10ce-5791-49ea-b37d-a3f012e3f5a4",
+              "name": "comment_type",
+              "value": "={{ $json.body.entry[0].changes[0].value.item }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        80
+      ],
+      "id": "0a7c0776-dd75-42fe-9e74-4b33e7aad0bd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0463266-b020-4c68-8459-98e4c48f9d99",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "rightValue": "269365756260181",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        112
+      ],
+      "id": "b6f3597c-c91c-43ca-8196-771d9e995c83",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('Edit Fields').item.json[\" comment_id\"].trim() }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAANIsVeiQE0BRAwxMhb5GZC3fgUGqZCdco7DXHJuYuIdlGX1Wmuc3W3EdGrVdZCiMaXAvQEk0wkH6GaCgce3ZBUq60jMNA8NZBXZC7Rc2hu8LdEasxUt1efhSSMcJsFEwpxtcLAr5oCLsMNScTRuYQDObWRDImYZCBZA3ZBzLmdZAZCifG0tnz6Try8VZAYuLSw0KodT99tb"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $('AQARY customer Service AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1184,
+        80
+      ],
+      "id": "aa8f7a56-2bd5-4443-87c6-f9d9298f9f69",
+      "name": "Reply to Facebook Comment"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sender_id }}\n\n",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        432
+      ],
+      "id": "b8ebc704-a42e-4c7a-b881-ce9f9b76a05a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        432
+      ],
+      "id": "3486ae6d-168a-4c11-bb37-d97e66c25d3d",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The user's name is: {{ $json.user_name }}\nThe user's comment is: \"{{ $json.user_comment }}\"",
+        "options": {
+          "systemMessage": "=You are an automated customer service assistant for AQARY Investment. \n\nYour ONLY job is to reply to the user's comment with a specific template message, translated into the language the user wrote their comment in.\n\nHere is the exact message you must send:\n\"Hello [USER_NAME], thank you for your interest! We will send you a private message shortly with more details.\"\n\nSTRICT RULES:\n1. Replace [USER_NAME] with the user's actual name provided in the prompt.\n2. Detect the language of the user's comment and translate the template message into that exact language (e.g., if they comment in Arabic, reply in Arabic. If English, reply in English).\n3. DO NOT add any conversational filler, greetings, emojis, or extra information. \n4. Output ONLY the final translated string.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        864,
+        80
+      ],
+      "id": "64d1e708-503e-4579-8db4-483216a5f956",
+      "name": "AQARY customer Service AI Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Use this tool ONLY after first_name, last_name, and phone (with country code) are all confirmed. Do NOT call it if any of these three fields is missing or unclear.",
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"data\": { \"Lead_Source\": \"WhatsApp\", \"First_Name\": $fromAI('first_name', 'Lead first name', 'string'), \"Last_Name\": $fromAI('last_name', 'Lead last name', 'string'), \"Phone\": $fromAI('phone', 'Lead phone number with country code', 'string') } } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1216,
+        432
+      ],
+      "id": "c4cbfc81-d2ed-424a-9781-42d305157c19",
+      "name": "Save Lead to CRM",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search for available properties that match the lead's requirements. Call it when the lead asks about available units, prices, locations, or property options. Build the query from what the lead has told you, for example: 'villas for sale Abu Dhabi under 5 million AED'.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"query\": $fromAI('query', 'Property search query based on lead requirements, e.g. apartments for sale Al Reem Island 1 million AED', 'string'), \"include_answer\": true, \"search_depth\": \"basic\", \"country\": \"united arab emirates\", \"include_domains\": [\"aqaryaid.com\"], \"max_results\": 5 } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1024,
+        432
+      ],
+      "id": "12319623-1e19-496b-b328-0c29fd980b4b",
+      "name": "Search Properties"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        112
+      ],
+      "id": "0d936797-1122-4823-90da-76744c5aef3b",
+      "name": "when receiving Facebook comment"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.entry[0].changes[0].value.verb }}",
+                    "rightValue": "add",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1d85c3d3-00a7-4570-ad5a-61ef9d6a5f24"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Comment"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "076e2c4b-3617-4741-84c1-c4ea841a91c5",
+                    "leftValue": "={{ $json.body.entry[0].changes[0].value.verb }}",
+                    "rightValue": "remove",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Remove Comment"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        96
+      ],
+      "id": "1caaf368-7691-4c30-9369-3449d96a0232",
+      "name": "Switch"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        304,
+        432
+      ],
+      "id": "e022b999-f823-4916-99f2-f5b0d7d1ea04",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead to CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Properties": {
+      "ai_tool": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AQARY customer Service AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Reply to Facebook Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "when receiving Facebook comment": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "wASx36bdFTlubpGhe8lV6"
+  },
+  "versionId": "65043449-dc3e-4b57-ac1a-c90871b4d95a",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "3YU8YSbJ4z5BR5kFbC05Q",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    },
+    {
+      "updatedAt": "2026-04-07T06:12:44.111Z",
+      "createdAt": "2026-04-07T06:12:44.111Z",
+      "id": "g8TNXGIROcW5CKyV",
+      "name": "Comments"
+    }
+  ]
+}

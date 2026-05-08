@@ -1,0 +1,343 @@
+{
+  "name": "When Lead owner changes",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-owner-changed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "448c1755-762e-45a5-8eeb-25ab8619cda5",
+      "name": "Webhook",
+      "webhookId": "6ef07bda-83c5-451e-8980-085997794a37"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d32898bf-e6b1-40e1-bb54-027098019e22",
+              "leftValue": "={{ $json.body.routing_key }}",
+              "rightValue": "lead.change.owner",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        0
+      ],
+      "id": "e3e98100-1f90-4a46-9a9a-318cdf850b92",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "=https://chatiq.aqaryservices.com/api/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        464,
+        -128
+      ],
+      "id": "df7b4113-e0a6-4f73-8eb4-bd01b1c2367d",
+      "name": "Creat ChatIQ Contact1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -128
+      ],
+      "id": "86ec3127-0a53-42d5-ac31-bca9783d5862",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        -128
+      ],
+      "id": "2d2b43b9-f1af-407a-986b-80613f433b63",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "28a630c1-12eb-483c-962e-a856c22aaf79",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "={{ $('Webhook').item.json.body.event_data.event_data.updated_data.Owner.email }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        -112
+      ],
+      "id": "4d8dac26-61c4-4b39-80df-8365a6110fb8",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        464,
+        96
+      ],
+      "id": "4c33ca83-0f2b-4f3c-b134-315c197d208e",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatiq.aqaryservices.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"phone_number\":\"{{ $('Webhook').item.json.body.event_data.event_data.updated_data.Phone }}\",\"name\":\"{{ $('Webhook').item.json.body.event_data.event_data.updated_data.First_Name }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1552,
+        -272
+      ],
+      "id": "1dd07126-8e84-4b8b-9b90-49488ae40a91",
+      "name": "Creat ChatIQ Contact3"
+    },
+    {
+      "parameters": {
+        "content": "## Change Broker accessibility to the lead WhatsApp\n** when the broker receives a new lead, he has a limited window of time, and then it's redirected to another broker",
+        "height": 512,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        128
+      ],
+      "id": "67b53352-8da2-40bb-b2f1-f37844f4035c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://chatiq.aqaryservices.com/api/contacts/{{ $json.data.id }}/assign",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_id",
+              "value": "={{ $('If1').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1888,
+        -112
+      ],
+      "id": "fddecde1-755f-4420-80bc-4b65bfe17253",
+      "name": "Aqary CIrcles - Change Lead Owner"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Creat ChatIQ Contact1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creat ChatIQ Contact1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Creat ChatIQ Contact3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creat ChatIQ Contact3": {
+      "main": [
+        [
+          {
+            "node": "Aqary CIrcles - Change Lead Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "dff313ef-de2b-4b57-a487-d89aec74ee54",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "0aExAmqtQ6aGgBzWMNBUU",
+  "tags": [
+    {
+      "updatedAt": "2026-03-27T07:28:26.216Z",
+      "createdAt": "2026-03-27T07:28:26.216Z",
+      "id": "rQmbxNv3PC0TCzDX",
+      "name": "Leads"
+    },
+    {
+      "updatedAt": "2026-04-07T06:55:50.218Z",
+      "createdAt": "2026-04-07T06:55:50.218Z",
+      "id": "5MD5hnnbUWNthm9U",
+      "name": "CRM"
+    }
+  ]
+}

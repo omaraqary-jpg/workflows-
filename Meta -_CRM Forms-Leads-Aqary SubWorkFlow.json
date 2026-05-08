@@ -1,0 +1,381 @@
+{
+  "name": "Meta ->CRM Forms-Leads-Aqary SubWorkFlow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        80
+      ],
+      "id": "4bf6899a-4d0a-4233-b239-91d30131c9c9",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "65f1c58a-886a-4440-9837-cdaee2a36635",
+              "leftValue": "={{ $json.created_time.substring(0, 10) }}",
+              "rightValue": "={{ DateTime.now().toUTC().toISODate() }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        96
+      ],
+      "id": "8eab4b9f-c668-4669-94b2-0f403ab21d3a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        80
+      ],
+      "id": "06a94aa2-0cc3-4fbf-9b14-1914f578b4ba",
+      "name": "Meta-Forms-Leads-Aqary"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31896543-e04f-4c44-a594-7f1dc7a7e01c",
+              "name": "PHONE_NUMBER",
+              "value": "={{ $json.field_data.find(field => field.name === 'phone_number')?.values[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "e5cbea75-fdc5-4ef6-8a24-4b6827f4991d",
+              "name": "",
+              "value": "={{ 'Form Name: ' + $('Loop Over Items').item.json.Form_Name + '\\n' + $json.field_data.filter(f => !['email', 'full_name', 'phone_number'].includes(f.name)).map(f => `${f.name.replace(/_/g, ' ')}: ${f.values[0]}`).join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -16
+      ],
+      "id": "4d301e3d-3bdf-4935-9986-d14b980a2c4d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/leads/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "1000"
+            },
+            {
+              "name": "=filters",
+              "value": "=[{\"field\":\"Phone\",\"operator\":\"equals\",\"value\":\"{{ $json.PHONE_NUMBER }}\"}]"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        816,
+        -16
+      ],
+      "id": "4be1aaba-8353-44dd-bda3-0e93674bcd20",
+      "name": "check if the lead was created at the same day before"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "823d9305-58ff-4e09-b7ba-160a5f91b1ca",
+              "leftValue": "={{ $json.records?.some(record => record.data?.Phone === $('Edit Fields').item.json.PHONE_NUMBER && String(record.data?.Created_Time || record.data?.Created_At || record.created_at).includes(DateTime.now().toUTC().toISODate())) || false }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "69460180-bea4-4688-876b-6e3d0f09b670",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"Lead_Source\": \"Meta Ads\",\n    \"Full_Name\": \"{{ $('Loop Over Items').item.json.field_data.find(f => f.name === 'full_name')?.values[0] }}\",\n    \"Phone\": \"{{ $('Loop Over Items').item.json.field_data.find(f => f.name === 'phone_number')?.values[0] }}\",\n    \"Email\": \"{{ $('Loop Over Items').item.json.field_data.find(f => f.name === 'email')?.values[0] }}\",\n    \"Campaign_Questions\": \"{{ $json.FORMATTED_NOTES }}\",\n    \"Lead_Type\": \"Buyer\",\n    \"Lead_Status\": \"Fresh Lead\",\n    \"Owner\": \"215\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1776,
+        -32
+      ],
+      "id": "7e37f68d-3a38-4df3-bab8-e6c8c42af874",
+      "name": "Create CRM New Lead",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        },
+        "httpBearerAuth": {
+          "id": "z2BCLm5lAtquzOt5",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Checking If This Lead Was Created In The Same Day\n**Duplicates Handling:** Searching the CRM by the lead number and comparing creation date with the current date",
+        "height": 384,
+        "width": 640,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -208
+      ],
+      "id": "53320a0f-d463-4708-bf9b-e789531ae78e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Create CRM Lead",
+        "height": 384,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -208
+      ],
+      "id": "29f6d13a-9316-4d26-ab31-cf8b3826277c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Checking Creation Time in Meta's Form",
+        "height": 432,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -208
+      ],
+      "id": "0bbe6849-71f2-4c3a-950c-ad4aeac0ef25",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meta-Forms-Leads-Aqary": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "check if the lead was created at the same day before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if the lead was created at the same day before": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Create CRM New Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Create CRM New Lead": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e7c41bb3-a2e1-4c7b-b05e-deca0c4639ee",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "WmMHNbDkj80gCk1W",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    },
+    {
+      "updatedAt": "2026-03-27T07:27:16.980Z",
+      "createdAt": "2026-03-27T07:27:16.980Z",
+      "id": "frNrXsDNnUlGw8RO",
+      "name": "ADs"
+    },
+    {
+      "updatedAt": "2026-03-27T07:28:26.216Z",
+      "createdAt": "2026-03-27T07:28:26.216Z",
+      "id": "rQmbxNv3PC0TCzDX",
+      "name": "Leads"
+    },
+    {
+      "updatedAt": "2026-04-07T06:55:50.218Z",
+      "createdAt": "2026-04-07T06:55:50.218Z",
+      "id": "5MD5hnnbUWNthm9U",
+      "name": "CRM"
+    }
+  ]
+}

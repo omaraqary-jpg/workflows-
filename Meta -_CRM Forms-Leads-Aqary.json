@@ -1,0 +1,492 @@
+{
+  "name": "Meta ->CRM Forms-Leads-Aqary",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v18.0/269365756260181/leadgen_forms",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "after",
+                    "value": "={{ $response.body.paging.cursors.after }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.paging.cursors.after == undefined }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        16
+      ],
+      "id": "41ebbb9b-2247-4e0f-9921-e538526968ec",
+      "name": "Get all forms by page id",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "GrjH7QRMWAcejAHf",
+          "name": "Bearer Auth account 3"
+        },
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account-page access token- never expire"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -64
+      ],
+      "id": "76f7ec43-e61b-49fe-9b25-2d20067ba1fa",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        496,
+        16
+      ],
+      "id": "94e4fa5b-14b3-42c6-924d-ecaed086848e",
+      "name": "Split Out Forms"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v18.0/{{ $json.id }}/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "after",
+                    "value": "={{ $response.body.paging.cursors.after }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.paging.cursors.after == undefined }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1248,
+        224
+      ],
+      "id": "b7c02abb-bc31-471e-8558-3efdcddd66a1",
+      "name": "Get Form Leads",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "GrjH7QRMWAcejAHf",
+          "name": "Bearer Auth account 3"
+        },
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account-page access token- never expire"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "420b0dd8-4f95-4e8d-9ea0-668004f8a2da",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1456,
+        224
+      ],
+      "id": "89cbde07-7dd9-4c33-9501-cacd371bce0d",
+      "name": "If has Leads"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "18e96c0d-ed18-46a1-97e2-efdc12e41589",
+              "name": "Forms Count",
+              "value": "={{ $json.data.length }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        304
+      ],
+      "id": "175c7d4c-558c-4692-baea-02b8b81788a1",
+      "name": "Forms Count"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "ARCHIVED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "cbb0acf5-f8b4-4014-b525-b88ff976562c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ARCHIVED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1ff38d00-afb6-4688-99a5-fe16d4ec500b",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "ACTIVE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ACTIVE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        112
+      ],
+      "id": "8c25b660-68ea-42d8-9468-9c719ed810ff",
+      "name": "Only Active Forms"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        16
+      ],
+      "id": "8ee87010-69d0-4aa2-846e-9dec3d0635ef",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        704,
+        16
+      ],
+      "id": "8b5eae42-fb8d-4fc9-88ca-c59779b9a6d9",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "WmMHNbDkj80gCk1W",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/WmMHNbDkj80gCk1W",
+          "cachedResultName": "Meta ->CRM Forms-Leads-Aqary SubWorkFlow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2064,
+        -64
+      ],
+      "id": "e90c1d5d-e591-459f-8893-a320d04014bb",
+      "name": "Execute Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c5516ed5-4ad8-4ce6-af23-98497e571ee0",
+              "name": "Form_Name",
+              "value": "={{ $('Loop Over Items1').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1856,
+        -64
+      ],
+      "id": "86339561-b1e1-47be-80f9-cbff72f67bdd",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get all forms by page id": {
+      "main": [
+        [
+          {
+            "node": "Forms Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Forms": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Form Leads": {
+      "main": [
+        [
+          {
+            "node": "If has Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If has Leads": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forms Count": {
+      "main": [
+        []
+      ]
+    },
+    "Only Active Forms": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Form Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get all forms by page id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Only Active Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "wASx36bdFTlubpGhe8lV6",
+    "timezone": "Asia/Dubai"
+  },
+  "versionId": "0b1f7d3c-6375-42d5-902a-5947e97fbee3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "w7_xSSapdqVUtb7jJwfv3",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    },
+    {
+      "updatedAt": "2026-03-27T07:27:16.980Z",
+      "createdAt": "2026-03-27T07:27:16.980Z",
+      "id": "frNrXsDNnUlGw8RO",
+      "name": "ADs"
+    },
+    {
+      "updatedAt": "2026-03-27T07:28:26.216Z",
+      "createdAt": "2026-03-27T07:28:26.216Z",
+      "id": "rQmbxNv3PC0TCzDX",
+      "name": "Leads"
+    },
+    {
+      "updatedAt": "2026-04-07T06:55:50.218Z",
+      "createdAt": "2026-04-07T06:55:50.218Z",
+      "id": "5MD5hnnbUWNthm9U",
+      "name": "CRM"
+    }
+  ]
+}

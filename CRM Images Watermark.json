@@ -1,0 +1,2046 @@
+{
+  "name": "CRM Images Watermark",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4448,
+        1824
+      ],
+      "id": "76f62ed7-e70f-43fb-8a4c-b165519fbb91",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/units/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.pagination.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.pagination.has_more === false }}",
+              "limitPagesFetched": true,
+              "maxRequests": 3
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -704,
+        816
+      ],
+      "id": "2fa12781-8c26-41f8-b8f2-96346fb7f428",
+      "name": "Get All Leads1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000001",
+              "name": "cursor",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000002",
+              "name": "hasMore",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        384
+      ],
+      "id": "233507a3-3eeb-4419-9163-71d50d7518a9",
+      "name": "Initialize",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = 'bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f';\nlet cursor = '';\nlet allRecords = [];\nlet hasMore = true;\nlet pageCount = 0;\n\nwhile (hasMore) {\n  let url = 'https://crm-api.aqaryone.com/api/v4/modules/Leads/records?per_page=100';\n  if (cursor) url += '&cursor=' + encodeURIComponent(cursor);\n\n  const response = await $http.request({\n    method: 'GET',\n    url: url,\n    headers: {\n      'Authorization': token,\n      'X-Entity-Id': '1'\n    }\n  });\n\n  const body = Array.isArray(response) ? response[0] : response;\n  const records = body.records || [];\n  allRecords = allRecords.concat(records);\n  pageCount++;\n\n  hasMore = body.pagination?.has_more === true;\n  cursor = body.pagination?.next_cursor ?? '';\n\n  if (!cursor && hasMore) break;\n  if (pageCount >= 200) break;\n}\n\nreturn allRecords.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        384
+      ],
+      "id": "22a1a8ec-34a6-4c19-a69d-fd44807c298d",
+      "name": "Fetch All Leads",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = 'bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f';\nlet cursor = '';\nlet allRecords = [];\nlet hasMore = true;\nlet pageCount = 0;\n\nwhile (hasMore) {\n  let url = 'https://crm-api.aqaryone.com/api/v4/modules/Leads/records?per_page=100';\n  if (cursor) url += '&cursor=' + encodeURIComponent(cursor);\n\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'Authorization': token,\n      'X-Entity-Id': '1'\n    }\n  });\n\n  const records = response.records || [];\n  allRecords = allRecords.concat(records);\n  pageCount++;\n\n  hasMore = response.pagination?.has_more === true;\n  cursor = response.pagination?.next_cursor ?? '';\n\n  if (!cursor && hasMore) break;\n  if (pageCount >= 2000) break;\n}\n\nreturn allRecords.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        432
+      ],
+      "id": "0901dec6-a933-435c-a178-a51e1b8b6653",
+      "name": "Fetch All Leads1"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        288,
+        896
+      ],
+      "id": "06e4226a-0950-4cf4-9a4b-5a9dc705f9c8",
+      "name": "Get All Leads",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        816
+      ],
+      "id": "955bf2b1-d76d-4fff-b470-b4e3adbfcd48",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -304,
+        816
+      ],
+      "id": "25ee994a-7dec-419b-bbac-5b30d5264519",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cadcd930-9cf4-4309-9014-e4a3a6fb6f41",
+              "leftValue": "={{ $json.data.Property_Name.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "aaa0475e-dec9-4776-b1ad-8eb3ac3ec32f",
+              "leftValue": "={{ $json.data.Owner_Name.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ec3a7128-c979-4c1a-b56d-491948189968",
+              "leftValue": "={{ $json.data.Unit_No }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9b0bdc84-fcd3-42a9-828e-206fe1954657",
+              "leftValue": "={{ $json.data.Unit_Type }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        832
+      ],
+      "id": "b2eef848-bdb5-45e6-acf4-9eb52b727438",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/units/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "1000"
+            },
+            {
+              "name": "=filters",
+              "value": "[{\"field\":\"Portal\",\"operator\":\"contains\",\"value\":\"bayut\"}]"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -992,
+        1216
+      ],
+      "id": "cdc644a2-530c-4fbf-8573-1b47753961e8",
+      "name": "Get All Leads2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        1216
+      ],
+      "id": "7bd47add-b004-415b-96f9-3dd0852d6de1",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        480,
+        672
+      ],
+      "id": "b9e9dc81-88d8-4fa9-b82f-182d38e0de9e",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.dewatermark.ai/api/object_removal/v2/erase_watermark",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "1c4a9c3d3f224e25ef8404c4a00e434225b3232a1b028774d77a30f20cb6a136"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "remove_text",
+              "value": "true"
+            },
+            {
+              "name": "predict_mode",
+              "value": "2.0"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "original_preview_image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        720,
+        672
+      ],
+      "id": "acd98db2-c54b-4cb6-8a56-7bf90043b34d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const base64Image = item.json.edited_image.image;\n\n  return {\n    json: item.json,\n    binary: {\n      image: {\n        data: base64Image,\n        mimeType: 'image/jpeg',\n        fileName: 'edited-image.jpg',\n      }\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        672
+      ],
+      "id": "d6da3310-9653-458b-82e2-c88b726baaff",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "=https://crm-api.aqaryone.com/api/v2/records/{{ $json.Id }}{{ $json.id }}/images",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -768,
+        1520
+      ],
+      "id": "f0c069ae-3a21-4eb2-8cee-a7f1fd83e031",
+      "name": "Get Unit Images"
+    },
+    {
+      "parameters": {
+        "content": "## Full Loop Structure\n**Double click**\nDetect Node (POST)\n      ↓\nWait 5s\n      ↓\nPoll Node (GET urls.get)  ←──────────┐\n      ↓                              │\nIF {{ $json.status }} = \"SUCCESS\"    │\n      │                              │\n   FALSE ────────────────────────────┘ (loop back via Wait)\n      │\n   TRUE\n      ↓\nIF {{ $json.output.watermark }} = true\n      ├── TRUE  → wmrMax/remove\n      └── FALSE → skip, use original URL",
+        "height": 384,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        944
+      ],
+      "id": "a2140889-6028-4fd8-823a-21b55d7f60c1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "y7ItD8XLyaUNXtCyX0s5W",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/y7ItD8XLyaUNXtCyX0s5W",
+          "cachedResultName": "Sub Workflow-CRM Images Watermark"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        1136
+      ],
+      "id": "f7830af6-48a9-4a07-a79b-124455cbf091",
+      "name": "Call 'Sub Workflow-CRM Images Watermark'",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "033cb32f-9f83-4a78-8cff-389b7683c401",
+              "leftValue": "={{ ![\"b767fb59-4784-43aa-bddf-b05e0bb15f2b\", \"80162b3c-d90d-45a9-88c3-6f2f98b9cf51\", \"40647dae-e653-4cbe-8d7e-11f00f82f903\", \"ec3ee65e-7b10-4df4-873c-a489d1d4764b\", \"a013ab54-d51a-452e-8b72-ad55deee8dba\", \"eb558159-b98b-48e6-b5f4-b15949b635af\", \"6ab795d7-6899-418f-814b-b93772d9e481\"].includes($json.id) }}",
+              "rightValue": "={{ ![\"eb0a3efe-68dd-4e7c-9590-a2c4b46a9dc9\", \"b767fb59-4784-43aa-bddf-b05e0bb15f2b\", \"80162b3c-d90d-45a9-88c3-6f2f98b9cf51\", \"40647dae-e653-4cbe-8d7e-11f00f82f903\", \"ec3ee65e-7b10-4df4-873c-a489d1d4764b\", \"a013ab54-d51a-452e-8b72-ad55deee8dba\", \"eb558159-b98b-48e6-b5f4-b15949b635af\", \"6ab795d7-6899-418f-814b-b93772d9e481\"].includes($json.id) }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -576,
+        1216
+      ],
+      "id": "296b5662-9aae-4bc1-9574-ee79b87f8612",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM-Watermark",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Unit_id": "={{ $('Loop Over Units').item.json.id }}",
+            "Image_id": "={{ $json.id }}",
+            "Image_url": "={{ $json.url }}",
+            "category_id": "={{ $json.category_id }}",
+            "Has_watermark": "under processing"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Unit_id",
+              "displayName": "Unit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image_id",
+              "displayName": "Image_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Image_url",
+              "displayName": "Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category_id",
+              "displayName": "category_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Has_watermark",
+              "displayName": "Has_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        1520
+      ],
+      "id": "1013c911-c0c1-4d11-916e-d30756124cb7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "message": "One Project done, please check and approve",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1712
+      ],
+      "id": "2fa7fef3-d6da-4176-81ba-7505ac1a0151",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        2000
+      ],
+      "id": "d8b0c301-f784-41a3-b6f5-e7a5002c8231",
+      "name": "Wait",
+      "webhookId": "7dddb1b0-0048-48e7-bdd2-0ad1b69af08f"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pixelbin.io/service/platform/transformation/v1.0/predictions/wmc/detect",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input.detect_text",
+              "value": "true"
+            },
+            {
+              "name": "input.image",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -80,
+        2000
+      ],
+      "id": "f803aa55-3b2a-4136-b985-29556dfbcd99",
+      "name": "if watermarked_1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('if watermarked_1').item.json.urls.get }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        272,
+        2000
+      ],
+      "id": "2327657d-daac-4309-9a50-7feb86f7e8a4",
+      "name": "if watermarked_2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8aff3409-b4b8-4453-bb1e-c109a9e1bb8a",
+              "leftValue": "={{ $json.output.watermark }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        2000
+      ],
+      "id": "7b7c924e-83e3-43f4-a62f-25b5c06b0c47",
+      "name": "If_watermarked"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        1984
+      ],
+      "id": "ea1da71e-596f-4713-be16-56554806f726",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pixelbin.io/service/platform/transformation/v1.0/predictions/wmrMax/remove",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input.image",
+              "value": "={{ $json.Image_url }}"
+            },
+            {
+              "name": "input.seed",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -3504,
+        1872
+      ],
+      "id": "852bb84e-2a4a-4248-8ecf-b716c74c1ab3",
+      "name": "Pixelbin Watermark Remover"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2976,
+        1872
+      ],
+      "id": "edfb5261-3f47-4e85-b1a7-2c6f8ced9f73",
+      "name": "Wait3",
+      "webhookId": "f84d12e6-b7ca-49a1-ab77-72557842ec79"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urls.get }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -3152,
+        1872
+      ],
+      "id": "2fe09863-3fbf-48d5-b43c-0571d53ef741",
+      "name": "If Finished"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urls.get }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2816,
+        1872
+      ],
+      "id": "d3a7a0d7-a8d3-4352-8227-c3c4492a5e6c",
+      "name": "If Finished_2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM-Watermark",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Has_watermark",
+              "lookupValue": "not working"
+            },
+            {
+              "lookupColumn": "watermark_removal_status",
+              "lookupValue": "retry"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4208,
+        1824
+      ],
+      "id": "891ba07a-4b20-44ae-a65f-442d7d5a6681",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3792,
+        1824
+      ],
+      "id": "3645e4ad-1646-4660-9ea2-a5439c0f3cdb",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fd225dcf-6dc9-4801-942e-98cad01cfebf"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "48a96cc4-be05-41f3-88c7-58a11f0fff3d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "RUNNING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RUNNING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2592,
+        1872
+      ],
+      "id": "5d89f27c-b565-4277-a84b-b4047a5ec57e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2544,
+        2080
+      ],
+      "id": "b82dcf3e-72f6-4758-9a6c-736c7ff9c34a",
+      "name": "Wait4",
+      "webhookId": "f84d12e6-b7ca-49a1-ab77-72557842ec79"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urls.get }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2384,
+        2080
+      ],
+      "id": "3c3e2a2e-0ba5-44a2-86ba-8c9e148b8c4a",
+      "name": "If Finished_"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM-Watermark",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image_url": "={{ $json.input.image }}",
+            "watermark_removal_status": "Removed",
+            "New_Image_url": "={{ $json.output[0] }}"
+          },
+          "matchingColumns": [
+            "Image_url"
+          ],
+          "schema": [
+            {
+              "id": "Unit_id",
+              "displayName": "Unit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_id",
+              "displayName": "Image_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_url",
+              "displayName": "Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category_id",
+              "displayName": "category_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Has_watermark",
+              "displayName": "Has_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "watermark_removal_status",
+              "displayName": "watermark_removal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "New_Image_url",
+              "displayName": "New_Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2368,
+        1712
+      ],
+      "id": "97ddb514-62b0-47bd-ace5-e83067ea6f53",
+      "name": "Append or update row in sheet",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM-Watermark",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image_url": "={{ $json.input.image }}",
+            "watermark_removal_status": "Removed",
+            "New_Image_url": "={{ $json.output[0] }}"
+          },
+          "matchingColumns": [
+            "Image_url"
+          ],
+          "schema": [
+            {
+              "id": "Unit_id",
+              "displayName": "Unit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_id",
+              "displayName": "Image_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_url",
+              "displayName": "Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category_id",
+              "displayName": "category_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Has_watermark",
+              "displayName": "Has_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "watermark_removal_status",
+              "displayName": "watermark_removal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "New_Image_url",
+              "displayName": "New_Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2000,
+        2064
+      ],
+      "id": "6d12b81c-435e-45fc-a6fe-f7ba3fcd7f20",
+      "name": "Append or update row in sheet1",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fd225dcf-6dc9-4801-942e-98cad01cfebf"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "48a96cc4-be05-41f3-88c7-58a11f0fff3d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "RUNNING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RUNNING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2240,
+        2080
+      ],
+      "id": "0ea7bf03-1419-437f-bfd4-41f171675e3f",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2128,
+        2336
+      ],
+      "id": "f1efa099-b3ce-45ef-aae7-7a851e65485c",
+      "name": "Wait5",
+      "webhookId": "f84d12e6-b7ca-49a1-ab77-72557842ec79"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urls.get }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer MmVmYWY1MDgtNWMwYi00YmZiLWFjZTMtZmI0MmM0NThlNzE0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1968,
+        2336
+      ],
+      "id": "61b8b4e4-bd2c-4ab3-8f51-9c5470d1ed21",
+      "name": "If Finished_1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM-Watermark",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uVm8fxq8Rbot37pq9yUDpfHBJ_JTyJwgPrEfpS0TVXM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image_url": "={{ $json.input.image }}",
+            "watermark_removal_status": "Removed",
+            "New_Image_url": "={{ $json.output[0] }}"
+          },
+          "matchingColumns": [
+            "Image_url"
+          ],
+          "schema": [
+            {
+              "id": "Unit_id",
+              "displayName": "Unit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_id",
+              "displayName": "Image_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image_url",
+              "displayName": "Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category_id",
+              "displayName": "category_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Has_watermark",
+              "displayName": "Has_watermark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "watermark_removal_status",
+              "displayName": "watermark_removal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "New_Image_url",
+              "displayName": "New_Image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1328,
+        2336
+      ],
+      "id": "6540801b-4b17-4fc8-b231-5c8a9cbfb343",
+      "name": "Append or update row in sheet2",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -336,
+        1200
+      ],
+      "id": "041c26c5-f2f6-415f-bf26-87776065468d",
+      "name": "Loop Over Units"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fd225dcf-6dc9-4801-942e-98cad01cfebf"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "48a96cc4-be05-41f3-88c7-58a11f0fff3d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "RUNNING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RUNNING"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ea51cca4-c553-48c3-8384-0c06429d473a",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "=FAILURE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FAILURE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1680,
+        2320
+      ],
+      "id": "a0911c2a-ecb9-44aa-be52-84f198e57e6d",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/leads/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "1000"
+            },
+            {
+              "name": "=filters",
+              "value": "[{\"field\":\"phone\",\"operator\":\"contains\",\"value\":\"bayut\"}]"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        560,
+        2384
+      ],
+      "id": "2800a1fb-9d2b-44a9-a1eb-950ba2efc2ef",
+      "name": "Get All Leads3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Initialize": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Leads1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Leads2": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Leads": {
+      "main": [
+        []
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    },
+    "Get Unit Images": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Sub Workflow-CRM Images Watermark'": {
+      "main": [
+        []
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Units",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "if watermarked_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if watermarked_1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if watermarked_2": {
+      "main": [
+        [
+          {
+            "node": "If_watermarked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "if watermarked_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pixelbin Watermark Remover": {
+      "main": [
+        [
+          {
+            "node": "If Finished",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "If Finished_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Finished": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Finished_2": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Pixelbin Watermark Remover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "If Finished_",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Finished_": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait5": {
+      "main": [
+        [
+          {
+            "node": "If Finished_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Finished_1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Units": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Unit Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b79b6947-9d60-4b06-99b5-749e901cb6d9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "-DZS0rBE29onvj3Q725_R",
+  "tags": []
+}

@@ -1,0 +1,801 @@
+{
+  "name": "Meta-Forms-Leads-FineHome",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "fc31528a-3b78-44d5-bd37-a1c140fb4f46",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v18.0/1915716659248396/leadgen_forms",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "after",
+                    "value": "={{ $response.body.paging.cursors.after }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.paging.cursors.after == undefined }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -208,
+        0
+      ],
+      "id": "ffb5ac82-375c-40e4-aa5f-4889e4589eba",
+      "name": "Get all forms by page id",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "GrjH7QRMWAcejAHf",
+          "name": "Bearer Auth account 3"
+        },
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account-page access token- never expire"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"data\": {\n        \"Lead_Source\": \"Meta Ads\",\n        \"First_Name\": \"{{ $json.full_name }}\",\n        \"Last_Name\": \"{{ $json.full_name }}\",\n        \"Phone\": \"{{ $json.phone_number }}\",\n        \"Lead_Type\": \"{{ $json.interested_in }}\",\n        \"Lead_Status\": \"Fresh Lead\",\n        \"Owner\": \"215\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1888,
+        544
+      ],
+      "id": "2781a957-39d4-4327-b999-e8a2831932a8",
+      "name": "Post Leads2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        },
+        "httpBearerAuth": {
+          "id": "z2BCLm5lAtquzOt5",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        16
+      ],
+      "id": "3317b945-0605-48dd-a212-115c00bb6ae1",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "{\n  \"filters\": [\n    {\n      \"field\": \"PHONE\",\n      \"operator\": \"equals\",\n      \"value\": \"+971543551670\",\n      \"label\": \"Phone\"\n    }\n  ]\n}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.pagination.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.pagination.has_more }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        960,
+        544
+      ],
+      "id": "ed8e1d9a-dba8-485b-ad63-d0a5bcda5499",
+      "name": "Get With Pagination",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters",
+              "value": "={{ JSON.stringify([{ \n  \"field\": \"Phone\", \n  \"operator\": \"contains\", \n  \"value\": $json.field_data.find(f => f.name === 'phone_number').values[0].replace(/\\D/g, '').slice(-9) \n}]) }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.pagination.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.pagination.has_more }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2368,
+        32
+      ],
+      "id": "ef340bea-5394-4548-94cb-7549a2c2988a",
+      "name": "Filter-CRM",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        80,
+        0
+      ],
+      "id": "98fd38d9-8a6b-454a-9a39-cf6eea3fc1af",
+      "name": "Split Out Forms"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        256,
+        0
+      ],
+      "id": "81efffbb-e16f-4a14-ac17-d2c2149185ab",
+      "name": "Loop Over Forms"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v18.0/{{ $json.id }}/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "after",
+                    "value": "={{ $response.body.paging.cursors.after }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.paging.cursors.after == undefined }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1040,
+        32
+      ],
+      "id": "41df43cd-fbfb-4de1-bcc1-149fd7107f37",
+      "name": "Get Form Leads",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "GrjH7QRMWAcejAHf",
+          "name": "Bearer Auth account 3"
+        },
+        "facebookGraphApi": {
+          "id": "EEiFIHVo06sdHMMV",
+          "name": "Facebook Graph account-page access token- never expire"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "420b0dd8-4f95-4e8d-9ea0-668004f8a2da",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        32
+      ],
+      "id": "02ed0871-be73-44d0-8e3b-95632304f9e9",
+      "name": "If has Leads"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "18e96c0d-ed18-46a1-97e2-efdc12e41589",
+              "name": "Forms Count",
+              "value": "={{ $json.data.length }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        288
+      ],
+      "id": "d6a27fe6-2155-46e4-a517-b94175393b82",
+      "name": "Forms Count"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-LUV9jFNzeJ1kJgkIXP1Olc-v3VEbSsR8je-KO3SHwY",
+          "mode": "list",
+          "cachedResultName": "Meta-Forms",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-LUV9jFNzeJ1kJgkIXP1Olc-v3VEbSsR8je-KO3SHwY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Forms",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-LUV9jFNzeJ1kJgkIXP1Olc-v3VEbSsR8je-KO3SHwY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Form_Name": "={{ $json.name }}",
+            "Form_ID": "={{ $json.id }}",
+            "Status": "={{ $('Split Out Forms').item.json.status }}"
+          },
+          "matchingColumns": [
+            "Form_ID"
+          ],
+          "schema": [
+            {
+              "id": "Form_Name",
+              "displayName": "Form_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Form_ID",
+              "displayName": "Form_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Creation_Date",
+              "displayName": "Creation_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        704
+      ],
+      "id": "a683cda6-f505-4bb3-a2b0-701bdcba8365",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop Over Forms').item.json.status }}",
+                    "rightValue": "ARCHIVED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "cbb0acf5-f8b4-4014-b525-b88ff976562c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ARCHIVED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1ff38d00-afb6-4688-99a5-fe16d4ec500b",
+                    "leftValue": "={{ $('Loop Over Forms').item.json.status }}",
+                    "rightValue": "ACTIVE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ACTIVE"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "allMatchingOutputs": false
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        16
+      ],
+      "id": "43bf1834-5d9c-47de-80df-6134459f3d10",
+      "name": "Only Active Forms"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "420b0dd8-4f95-4e8d-9ea0-668004f8a2da",
+              "leftValue": "={{ $json.records }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2624,
+        32
+      ],
+      "id": "b987388a-5646-454d-8350-cc0b8a641ae6",
+      "name": "If Lead not exists"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        32
+      ],
+      "id": "2e5cd679-0edc-4180-b35a-7c3b709079fc",
+      "name": "Wait",
+      "webhookId": "9cb0ecef-a11c-416c-b2d4-1630cd173ca8"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1664,
+        16
+      ],
+      "id": "036c60e8-8439-47b1-98fd-c228c2ede5ce",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters",
+              "value": "={{ JSON.stringify([{ \n  \"field\": \"Phone\", \n  \"operator\": \"contains\", \n  \"value\": $json.field_data.find(f => f.name === 'phone_number').values[0].replace(/\\D/g, '').slice(-9) \n}]) }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.pagination.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.pagination.has_more }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2640,
+        528
+      ],
+      "id": "f0d0ceb6-1110-4d1f-ad31-d98ed6113b86",
+      "name": "Filter-CRM1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get all forms by page id": {
+      "main": [
+        [
+          {
+            "node": "Forms Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all forms by page id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter-CRM": {
+      "main": [
+        [
+          {
+            "node": "If Lead not exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Forms": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Forms": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Only Active Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Form Leads": {
+      "main": [
+        [
+          {
+            "node": "If has Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If has Leads": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forms Count": {
+      "main": [
+        []
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Only Active Forms": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Forms",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Form Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Filter-CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Lead not exists": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2f6b6af3-1d78-434b-b47c-d5d3093db93c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "MHYXwQR5ibjOtNUg",
+  "tags": [
+    {
+      "updatedAt": "2026-02-03T07:23:19.060Z",
+      "createdAt": "2026-02-03T07:23:19.060Z",
+      "id": "gwNM09lB2cZgdkEp",
+      "name": "FINEHOME"
+    },
+    {
+      "updatedAt": "2026-03-27T07:28:26.216Z",
+      "createdAt": "2026-03-27T07:28:26.216Z",
+      "id": "rQmbxNv3PC0TCzDX",
+      "name": "Leads"
+    }
+  ]
+}

@@ -1,0 +1,492 @@
+{
+  "name": "From CRM to PBX",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        -96
+      ],
+      "id": "f126dbf7-da8e-4693-a1b3-f223d80ee441",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -96
+      ],
+      "id": "a03d57ea-52fd-4378-bb37-83a9860fa740",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        48,
+        -96
+      ],
+      "id": "8afe4a3e-f1ac-4128-b671-4e4b1de26ed7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "## ListPBX API Reference\n\n\n\nBase URL: http://your-serv\n\n\ner:8080 Version: v1 Content-Type: application/json\n\nAuthentication\nAll /v1/* endpoints require one of two methods.\n\nMethod 1 — Bearer JWT (admin web dashboard)\nAuthorization: Bearer <token>\nIssued by POST /auth/login. Expires after 24 hours. Use this for the admin UI only.\n\nMethod 2 — API Key (mobile apps, agents, CRM integrations)\nX-API-Key: lpbx_<id>_<secret>\nNever expires. Create via POST /v1/api-keys in the dashboard. This is the correct method for mobile agents.\n\nWhich method should I use?\nWho\tMethod\tHow to get credentials\nAdmin web dashboard\tBearer JWT\tPOST /auth/login → use token\nMobile agent app\tAPI Key\tAdmin creates key → distribute to agent\nCRM / backend server\tAPI Key\tAdmin creates key → configure in CRM\nCI/webhooks\tAPI Key\tAdmin creates key → store in secrets\nMobile team note: Do not use /auth/login in agent apps. The login endpoint is scoped to the tenant admin and issues a short-lived (24h) token. Instead, the admin creates a long-lived API key per app/agent from the dashboard, and the app sends X-API-Key: lpbx_xxx_yyy on every request. No login flow needed.\n\nErrors\nAll errors return JSON:\n\n{ \"error\": \"description\", \"code\": 400 }\nCode\tMeaning\n400\tBad request / missing field\n401\tMissing or invalid credentials\n404\tResource not found\n409\tConflict (duplicate)\n503\tNo outbound trunk configured\n500\tInternal error\nAuth Endpoints\nThese endpoints are for the admin web dashboard only. Mobile agents and integrations should use API Keys — see Authentication section above.\n\nRegister Tenant\nPOST /auth/register\nCreates a new workspace. Returns a JWT for immediate use.\n\nRequest\n\n{\n  \"name\": \"Aqary International\",\n  \"domain\": \"aqary.local\",\n  \"email\": \"admin@aqary.com\",\n  \"password\": \"secret\"\n}\nResponse 201\n\n{\n  \"tenant_id\": \"897464a2-d706-4e8d-a69c-6854e68c7ddb\",\n  \"token\": \"eyJhbGci...\"\n}\nLogin (admin dashboard only)\nPOST /auth/login\nReturns a short-lived JWT (24 h) for the admin dashboard. Not for agent apps — use Agent Login below.\n\nRequest\n\n{\n  \"domain\": \"aqary.local\",\n  \"password\": \"your-admin-password\"\n}\nResponse 200\n\n{\n  \"token\": \"eyJhbGci...\",\n  \"tenant_id\": \"897464a2-...\"\n}\nAgent Login\nPOST /auth/agent/login\nAuthenticates a specific agent (extension) with their extension number or email + SIP password. Returns a JWT that carries the agent's identity — no API key distribution needed.\n\nUse this in mobile apps, softphone apps, or any per-agent client.\n\nRequest — by extension number:\n\n{\n  \"domain\": \"aqary.local\",\n  \"extension\": \"1001\",\n  \"password\": \"AgentPass123\"\n}\nRequest — by email:\n\n{\n  \"domain\": \"aqary.local\",\n  \"email\": \"ahmed@aqary.com\",\n  \"password\": \"AgentPass123\"\n}\nResponse 200\n\n{\n  \"token\": \"eyJhbGci...\",\n  \"tenant_id\": \"897464a2-...\",\n  \"extension_id\": \"3d116d32-...\",\n  \"extension\": \"1001\",\n  \"name\": \"Ahmed Al Mansouri\"\n}\nThe token embeds the agent's extension. Any subsequent POST /v1/calls made with this token will automatically use \"from\": \"1001\" — the agent doesn't need to pass it manually.\n\nError cases: - 401 — wrong password, extension not found, or account disabled - 401 — extension exists but has no password set (admin hasn't saved credentials yet)\n\nAccount\nGet Current Tenant\nGET /v1/me\nResponse 200\n\n{\n  \"id\": \"897464a2-...\",\n  \"name\": \"Aqary International\",\n  \"domain\": \"192.168.1.173\"\n}\nAPI Keys\nAPI keys are the recommended credential for mobile agent apps, CRM integrations, and backend services. They never expire and do not require a login flow.\n\nHow to issue a key for an agent: 1. Admin logs into the dashboard → API Keys → Create 2. Give the key a descriptive name (e.g. \"Agent - Ahmed iOS\") 3. Copy the key immediately — it is shown once only 4. Paste it into the agent's app config or environment variable\n\nHow the agent app uses it — every request:\n\nGET /v1/calls HTTP/1.1\nX-API-Key: lpbx_abc12345_<secret>\nNo token refresh, no login endpoint, no expiry handling needed.\n\nCreate API Key\nPOST /v1/api-keys\nRequest\n\n{ \"name\": \"Agent - Ahmed iOS\" }\nResponse 201\n\n{\n  \"id\": \"abc12345\",\n  \"name\": \"Agent - Ahmed iOS\",\n  \"key\": \"lpbx_abc12345_<48-char-hex>\",\n  \"warning\": \"Store this key securely — it will not be shown again\"\n}\nThe raw key is shown once only. Store it immediately.\n\nList API Keys\nGET /v1/api-keys\nResponse 200\n\n{\n  \"api_keys\": [\n    {\n      \"id\": \"abc12345\",\n      \"name\": \"CRM Integration\",\n      \"last_used\": \"2026-04-20T14:00:00Z\",\n      \"created_at\": \"2026-04-01T10:00:00Z\"\n    }\n  ]\n}\nDelete API Key\nDELETE /v1/api-keys/:id\nResponse 204 No Content\n\nExtensions\nSIP endpoints (desk phones, softphones, WebRTC clients). Each extension gets a number (e.g. 1001) and SIP credentials.\n\nList Extensions\nGET /v1/extensions\nResponse 200\n\n{\n  \"extensions\": [\n    {\n      \"id\": \"3d116d32-...\",\n      \"number\": \"1001\",\n      \"name\": \"Sales Agent\",\n      \"voicemail\": true,\n      \"call_forward\": \"\",\n      \"do_not_disturb\": false,\n      \"max_calls\": 5,\n      \"enabled\": true,\n      \"created_at\": \"2026-04-01T10:00:00Z\"\n    }\n  ],\n  \"total\": 1\n}\nCreate Extension\nPOST /v1/extensions\nRequest\n\n{\n  \"number\": \"1001\",\n  \"name\": \"Sales Agent\",\n  \"password\": \"Pass1234\",\n  \"max_calls\": 5\n}\nResponse 201\n\n{\n  \"id\": \"3d116d32-...\",\n  \"number\": \"1001\",\n  \"name\": \"Sales Agent\"\n}\nSIP Registration — use these settings in MicroSIP / any SIP client: - Server: your PBX IP (e.g. 192.168.1.173) - Port: 5060 - Username: 1001 - Password: the password set above\n\nGet Extension\nGET /v1/extensions/:id\nUpdate Extension\nPUT /v1/extensions/:id\nAll fields optional — only provided fields are updated.\n\nRequest\n\n{\n  \"name\": \"Senior Agent\",\n  \"call_forward\": \"+971501234567\",\n  \"do_not_disturb\": false,\n  \"voicemail\": true,\n  \"max_calls\": 10,\n  \"enabled\": true\n}\nResponse 200 { \"status\": \"updated\" }\n\nDelete Extension\nDELETE /v1/extensions/:id\nResponse 204 No Content\n\nTrunks\nSIP trunks connect your PBX to the outside world (PSTN carriers, GSM gateways, Twilio).\n\nList Trunks\nGET /v1/trunks\nResponse 200\n\n{\n  \"trunks\": [\n    {\n      \"id\": \"...\",\n      \"name\": \"SIM_CARDS\",\n      \"provider\": \"generic\",\n      \"host\": \"192.168.1.69\",\n      \"port\": 5060,\n      \"username\": \"\",\n      \"from_domain\": \"192.168.1.173\",\n      \"codecs\": [\"PCMU\", \"PCMA\"],\n      \"max_channels\": 30,\n      \"inbound\": true,\n      \"outbound\": true,\n      \"outbound_priority\": 1,\n      \"enabled\": true\n    }\n  ],\n  \"total\": 1\n}\nCreate Trunk\nPOST /v1/trunks\nRequest\n\n{\n  \"name\": \"SIM_CARDS\",\n  \"provider\": \"generic\",\n  \"host\": \"192.168.1.69\",\n  \"port\": 5060,\n  \"username\": \"\",\n  \"password\": \"\",\n  \"from_domain\": \"192.168.1.173\",\n  \"codecs\": [\"PCMU\", \"PCMA\"],\n  \"max_channels\": 30,\n  \"inbound\": true,\n  \"outbound\": true,\n  \"outbound_priority\": 1\n}\nField\tRequired\tDefault\tNotes\nname\t✓\t—\tUnique name, no spaces\nhost\t✓\t—\tSIP server IP or hostname\nprovider\t—\tgeneric\tgeneric or twilio\nport\t—\t5060\tSIP port\noutbound_priority\t—\t10\tLower = preferred (1 beats 10)\nResponse 201\n\n{ \"id\": \"...\", \"name\": \"SIM_CARDS\" }\nGet / Update / Delete Trunk\nGET    /v1/trunks/:id\nPUT    /v1/trunks/:id\nDELETE /v1/trunks/:id\nTrigger FreeSWITCH Rescan\nPOST /v1/trunks/:id/register\nForces FreeSWITCH to reload gateway config. Call after modifying a trunk.\n\nResponse 200 { \"status\": \"rescanning\" }\n\nTwilio: List Numbers\nPOST /v1/trunks/twilio/numbers\nFetches phone numbers from Twilio without exposing credentials to the frontend.\n\nRequest\n\n{\n  \"account_sid\": \"ACxxxxxxx\",\n  \"auth_token\": \"your_auth_token\"\n}\nResponse 200\n\n{\n  \"numbers\": [\n    { \"sid\": \"PNxxx\", \"friendly_name\": \"+1 212...\", \"phone_number\": \"+12125551234\" }\n  ]\n}\nTwilio: Auto-Setup\nPOST /v1/trunks/twilio/setup\nAutomatically creates a Twilio Elastic SIP Trunk, sets the origination URL, and assigns phone numbers — all in one call.\n\nRequest\n\n{\n  \"account_sid\": \"ACxxxxxxx\",\n  \"auth_token\": \"your_auth_token\",\n  \"server_address\": \"your.pbx.ip:5060\",\n  \"trunk_name\": \"ListPBX Main\",\n  \"phone_number_sids\": [\"PNxxx\", \"PNyyy\"]\n}\nResponse 200\n\n{\n  \"trunk_sid\": \"TKxxx\",\n  \"termination_uri\": \"listpbx-main-a3f2.pstn.twilio.com\",\n  \"sip_url\": \"sip:your.pbx.ip:5060\",\n  \"assigned\": 2,\n  \"total\": 2\n}\nInbound Routes\nMaps incoming DIDs (phone numbers) to actions. Evaluated in priority order (higher = first).\n\nRoute Types\nroute_type\troute_target\tBehaviour\nextension\tExtension number e.g. \"1001\"\tRing a SIP softphone/phone\nivr\tIVR UUID\tPlay IVR menu\nvoicemail\tExtension number\tGo straight to voicemail\nmasked_bridge\tAgent's real number e.g. \"+971501234567\"\tPrivacy bridge — both parties see only the DID\nhangup\t(ignored)\tReject the call\nwebhook\tWebhook URL\tPOST call details to your endpoint for dynamic routing\nPrivacy Bridge (masked_bridge)\nThe core number-masking feature for real estate, recruitment, and any scenario where you need to protect agent/customer numbers:\n\nLead dials +971503479311  (published DID)\n         ↓\n  FreeSWITCH receives call\n         ↓\n  Originates to +971501234567  (agent's real mobile)\n  with caller ID = +971503479311\n         ↓\n  Both legs bridge\n         ↓\nLead sees: +971503479311   (dialled it)\nAgent sees: +971503479311  (incoming)\nNeither sees the other's real number\nList Routes\nGET /v1/routes\nResponse 200\n\n{\n  \"routes\": [\n    {\n      \"id\": \"...\",\n      \"did\": \"+971503479311\",\n      \"route_type\": \"masked_bridge\",\n      \"route_target\": \"+971501234567\",\n      \"trunk_id\": null,\n      \"priority\": 10,\n      \"enabled\": true\n    }\n  ],\n  \"total\": 1\n}\nCreate Route\nPOST /v1/routes\nRequest\n\n{\n  \"did\": \"+971503479311\",\n  \"route_type\": \"masked_bridge\",\n  \"route_target\": \"+971501234567\",\n  \"trunk_id\": \"<trunk-uuid>\",\n  \"priority\": 10\n}\nField\tNotes\ndid\tExact E.164 number, or \"any\" to catch all unmatched calls\nroute_type\tSee Route Types table above\nroute_target\tDepends on route_type\ntrunk_id\tOptional. Forces a specific outbound trunk for masked_bridge. Defaults to highest-priority trunk\npriority\tHigher wins. Use to order fallbacks\nResponse 201 { \"id\": \"...\" }\n\nGet / Update / Delete Route\nGET    /v1/routes/:id\nPUT    /v1/routes/:id\nDELETE /v1/routes/:id\nUpdate Request (all fields optional)\n\n{\n  \"did\": \"+971503479311\",\n  \"route_type\": \"extension\",\n  \"route_target\": \"1001\",\n  \"priority\": 20,\n  \"enabled\": false\n}\nIVRs\nInteractive Voice Response menus with DTMF digit routing.\n\nCreate IVR\nPOST /v1/ivrs\nRequest\n\n{\n  \"name\": \"Main Menu\",\n  \"greeting\": \"Welcome to Aqary. Press 1 for Sales, 2 for Support.\",\n  \"timeout\": 10,\n  \"max_retries\": 3,\n  \"options\": [\n    { \"digit\": \"1\", \"description\": \"Sales\", \"route_type\": \"extension\", \"route_target\": \"1001\" },\n    { \"digit\": \"2\", \"description\": \"Support\", \"route_type\": \"extension\", \"route_target\": \"1002\" },\n    { \"digit\": \"0\", \"description\": \"Operator\", \"route_type\": \"extension\", \"route_target\": \"1000\" }\n  ]\n}\nResponse 201 { \"id\": \"...\", \"name\": \"Main Menu\" }\n\nList / Get / Update / Delete IVR\nGET    /v1/ivrs\nGET    /v1/ivrs/:id\nPUT    /v1/ivrs/:id\nDELETE /v1/ivrs/:id\nContacts\nPhone book scoped to your tenant. Contact names appear in the call log UI when a number matches.\n\nList Contacts\nGET /v1/contacts?search=<query>&limit=200&offset=0\nsearch is optional — matches against name, phone, or company (case-insensitive).\n\nResponse 200\n\n{\n  \"contacts\": [\n    {\n      \"id\": \"c1a2b3c4-...\",\n      \"name\": \"Jane Smith\",\n      \"phone\": \"+971501234567\",\n      \"email\": \"jane@example.com\",\n      \"company\": \"Acme Corp\",\n      \"notes\": \"VIP client\",\n      \"created_at\": \"2026-04-27T10:00:00Z\",\n      \"updated_at\": \"2026-04-27T10:00:00Z\"\n    }\n  ],\n  \"total\": 1\n}\nCreate Contact\nPOST /v1/contacts\nRequest\n\n{\n  \"name\": \"Jane Smith\",\n  \"phone\": \"+971501234567\",\n  \"email\": \"jane@example.com\",\n  \"company\": \"Acme Corp\",\n  \"notes\": \"VIP client\"\n}\nField\tRequired\tNotes\nname\t✓\tDisplay name\nphone\t✓\tE.164 recommended\nemail\t—\tOptional\ncompany\t—\tOptional\nnotes\t—\tOptional free-text\nResponse 201\n\n{ \"id\": \"c1a2b3c4-...\" }\nLookup by Phone\nGET /v1/contacts/lookup?phone=+971501234567\nFinds the first contact whose phone exactly matches. Returns null if not found.\n\nResponse 200\n\n{ \"contact\": { \"id\": \"...\", \"name\": \"Jane Smith\", ... } }\n{ \"contact\": null }\nGet Contact\nGET /v1/contacts/:id\nResponse 200 — full contact object (same shape as list items)\n\nUpdate Contact\nPUT /v1/contacts/:id\nAll fields optional — only provided fields are updated.\n\nRequest\n\n{\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+971509999999\",\n  \"company\": \"New Corp\"\n}\nResponse 200 { \"status\": \"updated\" }\n\nDelete Contact\nDELETE /v1/contacts/:id\nResponse 204 No Content\n\nCalls\nDial Outbound Call\nPOST /v1/calls\nTwo modes:\n\nClick-to-call (rings agent's SIP phone first, then bridges to PSTN):\n\n{\n  \"from\": \"1001\",\n  \"to\": \"+971501234567\",\n  \"trunk_id\": \"<optional-trunk-uuid>\"\n}\nDirect dial (PSTN call immediately, no SIP phone involved):\n\n{\n  \"to\": \"+971501234567\",\n  \"trunk_id\": \"<optional-trunk-uuid>\"\n}\nResponse 201\n\n{ \"call_id\": \"4ff17660-690c-42f7-bd02-30a289583f04\" }\nUse call_id to hang up, hold, transfer, or record the call.\n\nList Active Calls\nGET /v1/calls\nReturns all currently active calls for the tenant.\n\nResponse 200\n\n{\n  \"calls\": [\n    {\n      \"id\": \"4ff17660-...\",\n      \"direction\": \"outbound\",\n      \"from\": \"1001\",\n      \"to\": \"+971501234567\",\n      \"status\": \"answered\",\n      \"started_at\": \"2026-04-20T14:00:00Z\"\n    }\n  ],\n  \"total\": 1\n}\nGet Call\nGET /v1/calls/:id\nChecks active calls first, falls back to call history.\n\nCall History\nGET /v1/calls/history?limit=50&offset=0\nPaginated call logs from the database.\n\nResponse 200\n\n{\n  \"calls\": [\n    {\n      \"id\": \"4ff17660-...\",\n      \"direction\": \"inbound\",\n      \"from\": \"+971561751531\",\n      \"to\": \"+971503479311\",\n      \"status\": \"hungup\",\n      \"started_at\": \"2026-04-20T14:00:00Z\",\n      \"answered_at\": \"2026-04-20T14:00:05Z\",\n      \"hung_up_at\": \"2026-04-20T14:02:30Z\",\n      \"duration\": 145,\n      \"recording_url\": null\n    }\n  ],\n  \"limit\": 50,\n  \"offset\": 0\n}\nHang Up Call\nDELETE /v1/calls/:id?cause=NORMAL_CLEARING\nResponse 200 { \"status\": \"ok\" }\n\nCommon cause values: NORMAL_CLEARING, USER_BUSY, NO_ANSWER, CALL_REJECTED\n\nHold / Unhold\nPOST /v1/calls/:id/hold\nPOST /v1/calls/:id/unhold\nResponse 200 { \"status\": \"held\" } / { \"status\": \"active\" }\n\nTransfer\nPOST /v1/calls/:id/transfer\nRequest\n\n{\n  \"to\": \"1002\",\n  \"context\": \"default\"\n}\nResponse 200 { \"status\": \"transferred\", \"to\": \"1002\" }\n\nStart Recording\nPOST /v1/calls/:id/record\nResponse 200\n\n{\n  \"status\": \"recording\",\n  \"path\": \"/var/lib/freeswitch/recordings/4ff17660-..._20260420-140000.wav\"\n}\nStop Recording\nDELETE /v1/calls/:id/record\nRequest (optional — omit to stop all recordings)\n\n{ \"path\": \"/var/lib/freeswitch/recordings/4ff17660-..._20260420-140000.wav\" }\nResponse 200 { \"status\": \"stopped\" }\n\nPlay Audio / TTS\nPOST /v1/calls/:id/play\nRequest — file path:\n\n{ \"audio\": \"/var/lib/freeswitch/sounds/en/us/callie/ivr/ivr-welcome.wav\" }\nRequest — text-to-speech:\n\n{ \"tts\": \"Your call is being transferred. Please hold.\" }\nResponse 200 { \"status\": \"playing\" }\n\nBridge Two Calls\nPOST /v1/calls/:id/bridge\nConnects two active call legs (e.g. after consulting a colleague).\n\nRequest\n\n{ \"call_id\": \"<second-leg-uuid>\" }\nResponse 200 { \"status\": \"bridged\" }\n\nWebSocket — Real-time Events\nGET /v1/ws?token=<jwt>\nUpgrade to WebSocket. Receives real-time call events for the tenant.\n\nConnection message:\n\n{ \"type\": \"connected\", \"msg\": \"ListPBX WebSocket ready\" }\nEvent message format (emitted on every call state change):\n\n{\n  \"type\": \"call.ringing\",\n  \"call_uuid\": \"4ff17660-...\",\n  \"caller_number\": \"+971561751531\",\n  \"dest_number\": \"+971503479311\",\n  \"direction\": \"inbound\",\n  \"timestamp\": \"2026-04-20T14:00:00Z\"\n}\nEvent types:\n\nType\tTrigger\ncall.ringing\tInbound call arrives or outbound leg starts ringing\ncall.answered\tCall answered\ncall.hung_up\tCall ended\ncall.recording_ready\tRecording file available\ncall.dtmf\tDTMF digit received\ncall.transcription\tReal-time transcription segment\nWebhooks\nReceive HTTP POST notifications for call events at your own endpoint.\n\nCreate Webhook\nPOST /v1/webhooks\nRequest\n\n{\n  \"url\": \"https://your-crm.com/webhooks/pbx\",\n  \"events\": [\"call.ringing\", \"call.answered\", \"call.hung_up\"]\n}\nResponse 201\n\n{\n  \"id\": \"...\",\n  \"url\": \"https://your-crm.com/webhooks/pbx\",\n  \"secret\": \"a3f2b1c9...\"\n}\nThe secret is shown once only. Use it to verify HMAC-SHA256 signatures on incoming webhook POSTs.\n\nWebhook Payload\nYour endpoint receives:\n\nPOST https://your-crm.com/webhooks/pbx\nContent-Type: application/json\nX-ListPBX-Signature: sha256=<hmac>\n\n{\n  \"type\": \"call.answered\",\n  \"call_uuid\": \"4ff17660-...\",\n  \"tenant_id\": \"897464a2-...\",\n  \"caller_number\": \"+971561751531\",\n  \"dest_number\": \"+971503479311\",\n  \"direction\": \"inbound\",\n  \"timestamp\": \"2026-04-20T14:00:05Z\"\n}\nVerify signature:\n\nimport hmac, hashlib\nexpected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()\nassert f\"sha256={expected}\" == request.headers[\"X-ListPBX-Signature\"]\nList / Update / Delete Webhook\nGET    /v1/webhooks\nPUT    /v1/webhooks/:id\nDELETE /v1/webhooks/:id\nTest Webhook\nPOST /v1/webhooks/:id/test\nSends a synthetic call.ringing event to verify your endpoint is reachable.\n\nResponse 200 { \"status\": \"test event sent\", \"event_type\": \"call.ringing\" }\n\nUtility\nHealth Check\nGET /health\nResponse 200\n\n{\n  \"status\": \"ok\",\n  \"service\": \"listpbx-api\",\n  \"esl\": \"connected\"\n}\nesl is \"connected\" when FreeSWITCH ESL is reachable, \"disconnected\" otherwise.\n\nPublic IP Detection\nGET /v1/server/public-ip\nReturns the server's public IP — useful for Twilio trunk configuration.\n\nResponse 200 { \"ip\": \"1.2.3.4\" }\n\nRun FreeSWITCH Command (debug)\nGET /internal/fs/cmd?q=sofia+status\nExecutes any FreeSWITCH API command and returns raw output. Restrict to internal network in production.\n\nResponse 200 text/plain\n\n                   Name          Type                                        Data      State\n=================================================================================================\n               internal       profile          sip:mod_sofia@192.168.1.173:5060      RUNNING (2)\n       internal::SIM_CARDS       gateway              sip:FreeSWITCH@192.168.1.69:5060        NOREG\nIntegration Recipes\nCRM Click-to-Call (iframe / web)\n// Agent clicks \"Call\" button in CRM\nconst res = await fetch('http://pbx:8080/v1/calls', {\n  method: 'POST',\n  headers: {\n    'Authorization': `Bearer ${token}`,\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({ from: '1001', to: '+971501234567' })\n});\nconst { call_id } = await res.json();\n\n// Hang up when agent clicks \"End\"\nawait fetch(`http://pbx:8080/v1/calls/${call_id}`, {\n  method: 'DELETE',\n  headers: { 'Authorization': `Bearer ${token}` }\n});\nReal-time Call Dashboard (WebSocket)\nconst ws = new WebSocket(`ws://pbx:8080/v1/ws?token=${token}`);\nws.onmessage = (e) => {\n  const event = JSON.parse(e.data);\n  if (event.type === 'call.ringing') {\n    showIncomingCall(event.caller_number);\n  } else if (event.type === 'call.hung_up') {\n    removeCallFromDashboard(event.call_uuid);\n  }\n};\nPrivacy Bridge — Real Estate Setup\n// 1. Create inbound route: when lead calls the published number,\n//    bridge them privately to the agent's real mobile\nawait fetch('/v1/routes', {\n  method: 'POST',\n  body: JSON.stringify({\n    did: '+971503479311',        // published \"agent\" number\n    route_type: 'masked_bridge',\n    route_target: '+971501234567', // agent's real mobile\n    trunk_id: simCardsTrunkId,\n    priority: 10\n  })\n});\n\n// Both parties see only +971503479311\n// Lead's real number is visible to the system (for CRM logging) but not to the agent\n// Agent's real mobile is never exposed to the lead\nMobile Agent App Integration\nMobile agents authenticate with an API Key — no login endpoint, no token refresh logic, no expiry.\n\nSetup — agent logs in with their own credentials:\n\n// iOS Swift — agent login on app launch\nlet body = [\"domain\": \"aqary.local\", \"extension\": \"1001\", \"password\": userEnteredPassword]\nvar loginRequest = URLRequest(url: URL(string: \"http://pbx:8080/auth/agent/login\")!)\nloginRequest.httpMethod = \"POST\"\nloginRequest.setValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")\nloginRequest.httpBody = try! JSONEncoder().encode(body)\n\nURLSession.shared.dataTask(with: loginRequest) { data, _, _ in\n    let response = try! JSONDecoder().decode(AgentLoginResponse.self, from: data!)\n    // Store token in Keychain — valid 24h, refresh on 401\n    Keychain.store(\"pbx_token\", response.token)\n    self.agentExtension = response.extension  // \"1001\"\n    self.agentName = response.name\n}.resume()\nEvery API request — use Bearer token:\n\n// iOS Swift — reusable auth header\nlet token = Keychain.get(\"pbx_token\")\nvar request = URLRequest(url: URL(string: \"http://pbx:8080/v1/calls/history?limit=20\")!)\nrequest.setValue(\"Bearer \\(token)\", forHTTPHeaderField: \"Authorization\")\n\nURLSession.shared.dataTask(with: request) { data, _, _ in\n    let history = try! JSONDecoder().decode(CallHistoryResponse.self, from: data!)\n    DispatchQueue.main.async { self.updateCallLog(history.calls) }\n}.resume()\n// Android Kotlin — OkHttp interceptor (add once, applies to all calls)\nval client = OkHttpClient.Builder()\n    .addInterceptor { chain ->\n        val token = tokenStore.get() // your secure storage\n        val request = chain.request().newBuilder()\n            .addHeader(\"Authorization\", \"Bearer $token\")\n            .build()\n        chain.proceed(request)\n    }\n    .build()\nUseful endpoints for agent apps:\n\nWhat\tEndpoint\nRecent call history\tGET /v1/calls/history?limit=20\nActive calls right now\tGET /v1/calls\nLook up caller name\tGET /v1/contacts/lookup?phone=+971501234567\nInitiate click-to-call\tPOST /v1/calls\nHang up a call\tDELETE /v1/calls/:id\nReal-time events\tWS /v1/ws?token=<jwt> (WebSocket requires JWT — request one via login if needed)\nNumber Format\nAll phone numbers should be in E.164 format: +<country-code><number>\n\nExample\tMeaning\n+971501234567\tUAE mobile\n+971503479311\tUAE landline\n+12125551234\tUS number\nUAE local format (0501234567) is also accepted and automatically converted internally.",
+        "height": 1584,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -272
+      ],
+      "id": "8c6f3660-9651-4593-b352-061b33f3e5bb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        -80
+      ],
+      "id": "138de73c-95f4-4732-b3a9-f1802d7c6d9f",
+      "name": "Wait",
+      "webhookId": "aa394cd7-192f-4efe-8e35-e892179149eb"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MhVI8ujnE05I2jakY33SXLiKkL-UnUWk6ZQ2PMybdkk",
+          "mode": "list",
+          "cachedResultName": "new_22",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MhVI8ujnE05I2jakY33SXLiKkL-UnUWk6ZQ2PMybdkk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MhVI8ujnE05I2jakY33SXLiKkL-UnUWk6ZQ2PMybdkk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Type": "={{ $('Loop Over Items').item.json.data.Lead_Source }}",
+            "Last_Name": "={{ $('Loop Over Items').item.json.data.Last_Name }}",
+            "Phone": "={{ $('Loop Over Items').item.json.data.Phone }}",
+            "Email": "={{ $('Loop Over Items').item.json.data.Email }}",
+            "source": "={{ $('Loop Over Items').item.json.data.Lead_Source }}",
+            "PBX_Post_status": "Created",
+            "First_Name": "={{ $('Loop Over Items').item.json.data.First_Name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First_Name",
+              "displayName": "First_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_Name",
+              "displayName": "Last_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PBX_Post_status",
+              "displayName": "PBX_Post_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        144
+      ],
+      "id": "2a46afa9-474f-4d43-8e55-f239c6a66746",
+      "name": "Append row in sheet",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uhPd0DD4GxqJFIHL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "652bfa7c-2b9a-4e0e-a438-6877c044919e",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        112
+      ],
+      "id": "8b2906f6-1acc-47a8-8782-d05bd8b214d0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.listpbx.com/v1/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "lpbx_f3e9c51e_88fcdc107c57c21e823c961fa32d417fc7821e9c47478f73"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ ($('Loop Over Items').item.json.data.First_Name ? $('Loop Over Items').item.json.data.First_Name + ' ' : '') + ($('Loop Over Items').item.json.data.Last_Name || '') }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $('Loop Over Items').item.json.data.Phone }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('Loop Over Items').item.json.data.Email }}"
+            },
+            {
+              "name": "crm_ref",
+              "value": "={{ $('Loop Over Items').item.json.data.Lead_Ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        128
+      ],
+      "id": "f54fb1cc-bb49-4efd-a8c1-fcb3f2692eb0",
+      "name": "Post to PBX",
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.listpbx.com/v1/contacts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=search",
+              "value": "={{ $json.data.Phone }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "lpbx_f3e9c51e_88fcdc107c57c21e823c961fa32d417fc7821e9c47478f73"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        320,
+        112
+      ],
+      "id": "6608bda3-2ad2-4fd6-b12c-2b55f7df4883",
+      "name": "Check for duplications",
+      "notesInFlow": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/leads/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.pagination.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.pagination.has_more === false }}",
+              "requestInterval": 15
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -544,
+        48
+      ],
+      "id": "731ef198-6b08-413a-89aa-e7b7b6167e09",
+      "name": "CRM Get All Leads1",
+      "retryOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "CRM Get All Leads1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Check for duplications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Post to PBX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to PBX": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for duplications": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM Get All Leads1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "5e49173d-e912-48d3-b6ec-0d69a38e5769",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "IzoOTkAQGuEA0QFakOx1N",
+  "tags": [
+    {
+      "updatedAt": "2026-04-07T06:55:50.218Z",
+      "createdAt": "2026-04-07T06:55:50.218Z",
+      "id": "5MD5hnnbUWNthm9U",
+      "name": "CRM"
+    },
+    {
+      "updatedAt": "2026-05-06T11:43:45.601Z",
+      "createdAt": "2026-05-06T11:43:45.601Z",
+      "id": "ufEMbu1EnCjrc5FJ",
+      "name": "PBX"
+    }
+  ]
+}

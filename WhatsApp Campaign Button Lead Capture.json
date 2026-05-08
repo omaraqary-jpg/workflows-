@@ -1,0 +1,95 @@
+{
+  "name": "WhatsApp Campaign Button Lead Capture",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "WhatsApp-Campaign-Button-Lead-Capture",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9ddaa3a6-cb31-4a82-8b71-83cf01227ae7",
+      "name": "Webhook",
+      "webhookId": "0b697d6c-926d-45dc-ab4d-0c56f4f8f7cd"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b4ea38c7-517b-4818-8d00-78af8d6addca",
+      "name": "from WhatsApp Templet --> CRM"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "connection": "upgrade",
+            "host": "n8n.aqaryservices.com",
+            "content-length": "113",
+            "x-forwarded-for": "20.203.31.58",
+            "content-type": "application/json",
+            "user-agent": "Go-http-client/2.0",
+            "accept-encoding": "gzip, br",
+            "cf-ray": "9f7faadbd90c4430-BOM",
+            "accept": "application/json",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "20.203.31.58",
+            "cf-ipcountry": "AE",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "phone": "",
+            "name": "",
+            "source": "WhatsApp Campaign - Aqary_Investment",
+            "call_preference": "btn_1"
+          },
+          "webhookUrl": "https://n8n.aqaryservices.com/webhook/WhatsApp-Campaign-Button-Lead-Capture",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "from WhatsApp Templet --> CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2871234a-7617-4838-bdd1-75f06ef54ef2",
+  "meta": {
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "a9lwyCqonhUFjwNEmYXUQ",
+  "tags": []
+}

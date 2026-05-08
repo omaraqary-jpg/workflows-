@@ -1,0 +1,128 @@
+{
+  "name": "finehome What'sApp campaign",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "6dfdd859-583e-4a11-bab5-94e84712f258",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/928894926979760/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAeyWemNJPgBROQZCNKNPVB7lDMok7GG4CXAjckadqHZA8QyJqieZAZBhGzcTDP2ZC9GgYubhmrxmFHhyo4EiFop8bioiWScbxSK1JsKwhsYWZCgfejO4CDN3O0nSLpfZBU820Q4idGQMHeXjuMuLymIoFhkAhZBlbfx3jGu9cVjNW5yDXQmcTePhPags154vhmor1aqSVxQtWp7dO6k5nUfCBIjuhpvy8zE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"messaging_product\": \"whatsapp\",\n  \"recipient_type\": \"individual\",\n  \"to\": \"971588424130\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"finehome_campaign\",\n    \"language\": {\n      \"code\": \"ar\"\n    },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          {\n            \"type\": \"text\",\n            \"text\": \"Omar\"\n          }\n        ]\n      },\n      {\n        \"type\": \"carousel\",\n        \"cards\": [\n          {\n            \"card_index\": 0,\n            \"components\": [\n              {\n                \"type\": \"header\",\n                \"parameters\": [\n                  {\n                    \"type\": \"image\",\n                    \"image\": {\n                      \"link\": \"https://i.imgur.com/1tf1clx.jpg\"\n                    }\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"card_index\": 1,\n            \"components\": [\n              {\n                \"type\": \"header\",\n                \"parameters\": [\n                  {\n                    \"type\": \"image\",\n                    \"image\": {\n                      \"link\": \"https://i.imgur.com/EL4vBAK.jpg\"\n                    }\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"card_index\": 2,\n            \"components\": [\n              {\n                \"type\": \"header\",\n                \"parameters\": [\n                  {\n                    \"type\": \"image\",\n                    \"image\": {\n                      \"link\": \"https://i.imgur.com/WADigEq.jpg\"\n                    }\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"card_index\": 3,\n            \"components\": [\n              {\n                \"type\": \"header\",\n                \"parameters\": [\n                  {\n                    \"type\": \"image\",\n                    \"image\": {\n                      \"link\": \"https://i.imgur.com/WADigEq.jpg\"\n\n                      \n                  }\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        272,
+        0
+      ],
+      "id": "a579227a-8a8e-462a-8d83-727c7072b7fe",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "content": "## Bulk WhatsApp Campaign\n**send bulk messages in the same time to old customers ",
+        "height": 464,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -16
+      ],
+      "id": "0b3449db-1c93-45ab-abcc-ccc1b578a130",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        0
+      ],
+      "id": "9fe230d1-3d94-4e56-9c56-b354a300cb48",
+      "name": "Get Customer Phone and name",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cxhIVI9AtX7mQiRq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Phone and name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Phone and name": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "154a5713-95e6-4f03-bbbb-c3bdadd7d397",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "AXbE4M47HmmMNM9UKIUkk",
+  "tags": []
+}

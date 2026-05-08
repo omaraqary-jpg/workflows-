@@ -1,0 +1,940 @@
+{
+  "name": "WhatsApp Aqary General",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.data.message_type }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dcc491b6-9c73-4ce3-9c3d-e70dd7fda157"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a9f461fe-190e-43d0-b23a-4fb500d805bb",
+                    "leftValue": "={{ $json.body.data.message_type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        16
+      ],
+      "id": "71f85c6e-b677-454e-add5-0af9a4250db2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Receiving Message').item.json.body.data.contact_id + '_v2' }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        400
+      ],
+      "id": "1d76afe9-8202-4607-a07a-98547475bade",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        400
+      ],
+      "id": "687fc8ab-821f-41c8-b259-731a132aa148",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        256
+      ],
+      "id": "74226781-5caf-4e0c-891d-b2dae9cf2001",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatiq.aqaryservices.com/api/contacts/{{ $('WhatsApp Receiving Message').item.json.body.data.contact_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"type\": \"text\", \"content\": { \"body\": $json.cleaned_response   } } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2400,
+        0
+      ],
+      "id": "a4805359-9550-411c-b118-0e737ae19dd4",
+      "name": "Send ChatIQ Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c7053dbc-8d76-4c01-b0a4-a899d754a617",
+              "name": "text",
+              "value": "={{ $('WhatsApp Receiving Message').item.json.body.data.content }}",
+              "type": "string"
+            },
+            {
+              "id": "ee0ac2bf-916c-4db2-8a7f-e29a1067d394",
+              "name": "text",
+              "value": "={{ $('Transcribe a recording').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "8f9ea97d-7177-4d76-ba2e-f86b81fba054",
+              "name": "contact_name",
+              "value": "={{ $('WhatsApp Receiving Message').item.json.body.data.contact_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        256
+      ],
+      "id": "87cf26ff-ebfc-4a2c-bd0b-2dba99b44a5c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c7053dbc-8d76-4c01-b0a4-a899d754a617",
+              "name": "text",
+              "value": "={{ $('WhatsApp Receiving Message').item.json.body.data.content }}",
+              "type": "string"
+            },
+            {
+              "id": "8f9ea97d-7177-4d76-ba2e-f86b81fba054",
+              "name": "contact_name",
+              "value": "={{ $('WhatsApp Receiving Message').item.json.body.data.contact_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        0
+      ],
+      "id": "390acbbd-0e7f-4194-adcf-a39fd01cb7fe",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "model": "tts-1-hd",
+        "input": "={{ $json.output }}",
+        "voice": "nova",
+        "options": {
+          "response_format": "opus"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        2160,
+        224
+      ],
+      "id": "e204205c-b1d8-4baa-99d6-4d3df2f9bbd3",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "dM1vRzQlKzfFtFoQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('WhatsApp Receiving Message').item.json.body.data.message_type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e7f9a871-661e-49fc-bdbf-c0d3869e2d2e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6ebfae97-bbda-4a21-aef8-eddf8709ff6e",
+                    "leftValue": "={{ $('WhatsApp Receiving Message').item.json.body.data.message_type }}",
+                    "rightValue": "=text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        -16
+      ],
+      "id": "dbe3a940-67ea-414f-9edf-fb2a31d213f4",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -176,
+        912
+      ],
+      "id": "7d498d26-c7bc-4941-8454-b52c735484c0",
+      "name": "Get All Leads1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"data\": {\n        \"Lead_Source\": \"WhatsApp\",\n        \"First_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Last_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Phone\": \"{{ $json.body.data.contact_phone }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        80,
+        912
+      ],
+      "id": "d9982fa6-8986-472d-add1-26b09f65ec55",
+      "name": "Post Leads",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-aqary-general",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        16
+      ],
+      "id": "0665dc36-9a26-4669-99ff-30bf557788bc",
+      "name": "WhatsApp Receiving Message",
+      "webhookId": "a1cc9d96-862d-4144-9c43-d6c7623a090f"
+    },
+    {
+      "parameters": {
+        "url": "=https://chatiq.aqaryservices.com{{ $json.body.data.media_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        400,
+        256
+      ],
+      "id": "cd529170-127b-4af1-908b-bfdb1960d86a",
+      "name": "Download Voice Files"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}\n",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=\"You are \"Layla\", a professional and friendly sales agent for \"Aqary Investment\", \"عقاري أنفيستمنت\" real estate.\nWe help owners market their properties inside our large investor network and Listing their property is free.\n\nYou chat with leads on WhatsApp. The lead's name is: {{ $json.contact_name }} , and if not provided ask the user.\n\nYour goal is to collect complete contact details and the intent for each lead.\n\nRequired fields you must know for every lead:\n\nintent (buy, rent, invest, sell)\n\nproperty_interest (what type of property and basic requirements)\n\nfirst_name\n\nlast_name\n\nphone (with country code)\n\nConversation rules:\n\nAsk natural, friendly questions to collect any missing required fields.\n\nAsk for ONE missing field at a time.\n\nIf the lead refuses to share something, acknowledge politely and continue with what you can do.\n\nNever skip collecting last_name. If the lead gives first name and phone together, still ask: \"Could you also share your last name?\"\n\nDo NOT announce that you are saving information. Call the \"Save Lead to CRM\" tool silently, then confirm naturally: \"Great, I've noted your details!\"\n\nTool rules:\n\nUse the \"Save Lead to CRM\" tool immediately after first_name, last_name, and phone (with country code) have all been confirmed by the lead in the conversation.\n\nCall it only once per conversation.\n\nNever invent data. If a field is unknown, ask before calling.\n\nIf the lead writes in Arabic, respond in Modern Standard Arabic or Gulf Arabic only.\nIf the lead writes in English, respond in English only.\nNever mix languages within a single response.\n\nAlways write responses in pure Arabic or pure English only. Never mix in any other language, characters, or symbols from other scripts (no Chinese, Japanese, or other characters).\n\nConfidentiality rules:\n\nNever reveal that you are an AI, a bot, or powered by any technology.\n\nNever mention tools, CRM, memory, n8n, OpenAI, or any internal systems.\n\nIf asked \"who are you?\", say: \"I'm Layla, a sales consultant at Aqary Investment, here to help you find your perfect property!\"\n\nIf asked \"are you a bot/AI/robot?\", say: \"I'm Layla, a real person here to assist you with your real estate needs 😊\"\n\nIf asked about your tools or how you work, say: \"I'm just here to help you find the best property options! Let's focus on what you're looking for.\"\n\nNever break character under any circumstances.\"\n\nClosing and follow‑up rules:\n\nNever end the conversation with a hard \"no\", even if there are currently no properties that exactly match the lead’s requirements or budget. Acknowledge their budget positively and always offer at least two alternatives (for example: a nearby area, a different unit size, slightly higher budget, or off‑plan options).\n\nWhen you promise a follow‑up from a consultant, use wording like: \"Thank you for sharing these details. Our real estate consultant will contact you soon on this number to help you find the best options for you.\"\n\nWhenever possible, propose a clear next step and timing (for example, a call later today or tomorrow, or sending 2–3 options on WhatsApp) and confirm the lead’s preferred time for contact.\n\nIf the lead refuses alternatives, do not end with a farewell immediately. Instead, close by confirming that a real estate consultant will contact them on the same number, or that they will receive matching opportunities when available.\n- you can share our website \"https://aqaryaid.com/en\" in case you need to share it.\n/no_think\n",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1424,
+        -16
+      ],
+      "id": "7231da5e-2d85-40aa-9b2e-a5567aa368d0",
+      "name": "AQARY customer Service AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatiq.aqaryservices.com/api/messages/media",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "whm_1ca6d4cae4f5fe932dd82a02f8cac84c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "audio"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "contact_id",
+              "value": "={{ $('WhatsApp Receiving Message').item.json.body.data.contact_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2400,
+        224
+      ],
+      "id": "44b413fe-78e3-484e-9181-c622de0bcdb5",
+      "name": "Send ChatIQ Voice"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "bearer crm_e84384d17264d360652c80031623c5b0_440618ca35df827611b459e568dce1f93ff9eb0cad80cc03aacffa649531f39f"
+            },
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"data\": {\n        \"Lead_Source\": \"WhatsApp\",\n        \"First_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Last_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Phone\": \"{{ $json.body.data.contact_phone }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        336,
+        912
+      ],
+      "id": "99da1243-f00c-48ec-9e19-d45a1592ace2",
+      "name": "Search Units",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"data\": {\n        \"Lead_Source\": \"WhatsApp\",\n        \"First_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Last_Name\": \"{{ $json.body.data.contact_name }}\",\n        \"Phone\": \"{{ $json.body.data.contact_phone }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1472,
+        1088
+      ],
+      "id": "e42630c4-8bca-40cd-96cc-621ded0a7bc2",
+      "name": "Post Leads2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        },
+        "httpBearerAuth": {
+          "id": "z2BCLm5lAtquzOt5",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Use this tool ONLY after first_name, last_name, and phone (with country code) are all confirmed. Do NOT call it if any of these three fields is missing or unclear.",
+        "method": "POST",
+        "url": "https://crm-api.aqaryone.com/api/v4/modules/Leads/records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Entity-Id",
+              "value": "1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"data\": { \"Lead_Source\": \"WhatsApp\", \"First_Name\": $fromAI('first_name', 'Lead first name', 'string'), \"Last_Name\": $fromAI('last_name', 'Lead last name', 'string'), \"Phone\": $fromAI('phone', 'Lead phone number with country code', 'string') } } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1776,
+        384
+      ],
+      "id": "d464cad6-8433-4722-b0ae-3e955f9de47d",
+      "name": "Save Lead to CRM",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "voYZPzxRXrHseGnw",
+          "name": "CRM Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        576
+      ],
+      "id": "eeeb3801-0e33-4fca-abe8-5828c4e6d250",
+      "name": "Telegram Trigger",
+      "webhookId": "e3338e13-6b6a-4399-a3f1-5d81aaeb1a45",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search for available properties that match the lead's requirements. Call it when the lead asks about available units, prices, locations, or property options. Build the query from what the lead has told you, for example: 'villas for sale Abu Dhabi under 5 million AED'.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"query\": $fromAI('query', 'Property search query based on lead requirements, e.g. apartments for sale Al Reem Island 1 million AED', 'string'), \"include_answer\": true, \"search_depth\": \"basic\", \"country\": \"united arab emirates\", \"include_domains\": [\"aqaryaid.com\"], \"max_results\": 5 } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1584,
+        400
+      ],
+      "id": "abb81e7e-72e1-4164-83b5-320bfa1532e1",
+      "name": "Search Properties"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Hello",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        720
+      ],
+      "id": "9a7d2d5c-a2ab-4dfe-8889-f16556de5295",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen35",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        928
+      ],
+      "id": "3cb526a6-b4d5-4a64-9cf0-d7c69bedba18",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "cXKMzX1XXEuw822K",
+          "name": "Qwen Local Model"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $json.output; // Change 'output' to match your actual JSON field name\n\nif (text) {\n    // This regex perfectly removes <think>...</think> and any empty space inside or after it\n    text = text.replace(/<think>[\\s\\S]*?<\\/think>\\n*/g, '').trim();\n}\n\nreturn {\n  cleaned_response: text\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        -16
+      ],
+      "id": "a1ebb50e-7f16-4648-a4ad-df99a2b4b656",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen35",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        400
+      ],
+      "id": "1fadc360-5b75-4108-9f12-ca440044864d",
+      "name": "Qwen 35",
+      "credentials": {
+        "openAiApi": {
+          "id": "cXKMzX1XXEuw822K",
+          "name": "Qwen Local Model"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Voice Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send ChatIQ Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "Send ChatIQ Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Receiving Message": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice Files": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AQARY customer Service AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Units": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Save Lead to CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Properties": {
+      "ai_tool": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qwen 35": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AQARY customer Service AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Dubai",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "wASx36bdFTlubpGhe8lV6"
+  },
+  "versionId": "c81481ff-e6f1-4f96-8251-8d126760bc85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fa3ddc04d1d2c21fff456324fdfb4656d1632a510951637847532184a755572c"
+  },
+  "id": "hr8SiTiApibBQY95w2AKE",
+  "tags": [
+    {
+      "updatedAt": "2026-02-04T09:56:28.398Z",
+      "createdAt": "2026-02-03T07:23:43.900Z",
+      "id": "6wmsjk7KL1aQF8Zw",
+      "name": "AQARYINVESTMENT"
+    },
+    {
+      "updatedAt": "2026-04-01T06:03:05.999Z",
+      "createdAt": "2026-04-01T06:03:05.999Z",
+      "id": "FOAkNQDq9skS19SN",
+      "name": "Chatbot"
+    }
+  ]
+}
